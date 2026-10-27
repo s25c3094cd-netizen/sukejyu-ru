@@ -208,14 +208,78 @@
     }
 
     .header-actions {
-
       display: flex;
-
       align-items: center;
-
       gap: 12px;
-
     }
+
+    .calendar-header { position: relative; }
+    .menu-toggle-btn {
+      position: relative;
+      z-index: 1002;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 46px;
+      height: 46px;
+      flex: 0 0 46px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 27px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0,0,0,.08);
+    }
+    /* Full-screen menu overlay: hide the page behind it and show three clear choices. */
+    .calendar-header .header-actions {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1001;
+      box-sizing: border-box;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      border: 0;
+      border-radius: 0;
+      background: rgba(13, 19, 32, .84);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      box-shadow: none;
+    }
+    .calendar-header .header-actions::before {
+      content: "MENU";
+      display: block;
+      margin-bottom: 12px;
+      color: rgba(255,255,255,.68);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .24em;
+    }
+    .calendar-header .header-actions.is-menu-open { display: flex; }
+    .calendar-header .header-actions button {
+      box-sizing: border-box;
+      width: min(340px, 100%);
+      min-height: 58px;
+      padding: 15px 22px;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 700;
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 18px;
+      color: #fff;
+      background: rgba(255,255,255,.10);
+      box-shadow: 0 8px 24px rgba(0,0,0,.16);
+      transition: background .18s ease, transform .18s ease;
+    }
+    .calendar-header .header-actions button:active { transform: scale(.98); background: rgba(255,255,255,.18); }
 
     h1,
 
@@ -975,17 +1039,22 @@
 
     }
 
-    /* 予定追加ボタンを画面右下に固定し、いつでも押しやすくする */
+    /* 予定追加ボタン：iPhoneの画面幅・セーフエリアからはみ出さない */
     #add-event-btn {
       position: fixed;
-      right: max(24px, calc((100vw - 1180px) / 2));
-      bottom: 24px;
+      right: max(16px, env(safe-area-inset-right));
+      bottom: max(16px, env(safe-area-inset-bottom));
       z-index: 100;
-      min-height: 54px;
-      padding: 0 24px;
+      box-sizing: border-box;
+      width: max-content;
+      max-width: calc(100vw - 32px);
+      min-width: 0;
+      min-height: 50px;
+      padding: 0 18px;
       border-radius: 999px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-      font-size: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      font-size: 15px;
+      white-space: nowrap;
     }
 
     .app.is-settings-view #add-event-btn,
@@ -994,11 +1063,26 @@
     }
 
     @media (max-width: 640px) {
+      .calendar-header {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .calendar-header h1 { font-size: clamp(21px, 6vw, 28px); min-width: 0; }
+      .calendar-header .header-actions { width: min(240px, calc(100vw - 32px)); }
       #add-event-btn {
-        right: 16px;
-        bottom: 16px;
-        min-height: 50px;
-        padding: 0 18px;
+        right: max(12px, env(safe-area-inset-right));
+        bottom: max(12px, env(safe-area-inset-bottom));
+        left: auto;
+        width: auto;
+        max-width: calc(100vw - 36px);
+        min-height: 48px;
+        padding: 0 14px;
+        font-size: 14px;
+        line-height: 1.25;
+        white-space: normal;
+        overflow-wrap: anywhere;
       }
     }
 
@@ -2527,6 +2611,103 @@
       .calendar-month-bar .holiday-toggle-button { font-size: 11px; padding: 7px 4px; }
       .day-holiday { font-size: 8px; }
     }
+
+
+    /* スマホ用：年月・移動ボタンと「今日／祝日」を分けて整列 */
+    @media (max-width: 600px) {
+      .calendar-panel { padding: 14px 10px; }
+      .calendar-month-bar {
+        display: grid !important;
+        grid-template-columns: 42px minmax(0, 1fr) 42px;
+        grid-template-areas:
+          "prev title next"
+          "today today holiday";
+        gap: 12px 8px;
+        align-items: center;
+        min-height: 0;
+        margin: 0 0 12px;
+        padding: 4px 0 12px !important;
+        border-bottom: 1px solid var(--border);
+      }
+      .calendar-month-bar #prev-month,
+      .calendar-month-bar #next-month {
+        position: static !important;
+        inset: auto !important;
+        justify-self: center;
+        width: 40px;
+        height: 40px;
+        margin: 0;
+      }
+      .calendar-month-bar #prev-month { grid-area: prev; }
+      .calendar-month-bar #next-month { grid-area: next; }
+      .calendar-month-bar .calendar-month-label {
+        grid-area: title;
+        position: static;
+        transform: none;
+        width: auto;
+        min-width: 0;
+        text-align: center;
+        pointer-events: none;
+      }
+      .calendar-month-bar .calendar-month-caption {
+        font-size: 10px;
+        margin-bottom: 3px;
+      }
+      .calendar-month-bar .month-title {
+        font-size: clamp(19px, 5.4vw, 24px);
+        line-height: 1.2;
+        white-space: nowrap;
+      }
+      .calendar-month-bar .calendar-today-button,
+      .calendar-month-bar .holiday-toggle-button {
+        width: 100%;
+        min-width: 0;
+        min-height: 42px;
+        box-sizing: border-box;
+        justify-self: stretch;
+        margin: 0;
+        padding: 9px 6px;
+        border-radius: var(--control-radius);
+        font-size: 12px;
+        line-height: 1.25;
+        white-space: nowrap;
+      }
+      .calendar-month-bar .calendar-today-button { grid-area: today; }
+      .calendar-month-bar .holiday-toggle-button { grid-area: holiday; }
+      .weekdays, .days { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+      .weekday { min-width: 0; padding: 7px 0; font-size: 11px; text-align: center; }
+      .day {
+        min-width: 0;
+        min-height: 54px;
+        box-sizing: border-box;
+        padding: 6px 1px 4px;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .day-number { display: block; font-size: 13px; line-height: 1.25; text-align: center; }
+      .day-holiday {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        overflow-wrap: anywhere;
+        margin-top: 3px;
+        font-size: 8px;
+        line-height: 1.15;
+        text-align: center;
+      }
+    }
+    @media (max-width: 380px) {
+      .calendar-panel { padding: 12px 7px; }
+      .calendar-month-bar { grid-template-columns: 36px minmax(0, 1fr) 36px; gap: 10px 5px; }
+      .calendar-month-bar #prev-month, .calendar-month-bar #next-month { width: 36px; height: 36px; }
+      .calendar-month-bar .calendar-today-button,
+      .calendar-month-bar .holiday-toggle-button { font-size: 11px; padding: 8px 3px; }
+      .day { min-height: 50px; }
+      .day-number { font-size: 12px; }
+      .day-holiday { font-size: 7px; }
+    }
+
 </style></head>
 
 <body>
@@ -2537,15 +2718,12 @@
 
       <h1>スケジュール帳</h1>
 
-      <div class="header-actions">
-
-        <button class="primary-button" id="share-toggle-btn" type="button">共有</button>
+      <button class="menu-toggle-btn" id="menu-toggle-btn" type="button" aria-label="メニューを開く" aria-expanded="false" aria-controls="main-menu">☰</button>
+      <nav class="header-actions" id="main-menu" aria-label="メインメニュー">
+        <button class="secondary-button" id="timetable-toggle-btn" type="button">時間割</button>
         <button class="secondary-button" id="settings-toggle-btn" type="button">設定</button>
-        <button class="secondary-button" id="timetable-toggle-btn" type="button">大学時間割</button>
-
-
-
-      </div>
+        <button class="primary-button" id="share-toggle-btn" type="button">共有</button>
+      </nav>
 
     </header>
 
@@ -3040,6 +3218,8 @@
         calendarTodayButton: document.getElementById("calendar-today-btn"),
         holidayToggleButton: document.getElementById("holiday-toggle-btn"),
 
+        menuToggleButton: document.getElementById("menu-toggle-btn"),
+        mainMenu: document.getElementById("main-menu"),
         shareToggleButton: document.getElementById("share-toggle-btn"),
         shareModalOverlay: document.getElementById("share-modal-overlay"),
         shareUrlInput: document.getElementById("share-url-input"),
@@ -5946,6 +6126,27 @@
         renderSchedule();
         renderTodayTasks();
         renderSelectedDayTimeline();
+      });
+
+      // ハンバーガーメニュー
+      const closeMainMenu = () => {
+        elements.mainMenu.classList.remove("is-menu-open");
+        elements.menuToggleButton.setAttribute("aria-expanded", "false");
+        elements.menuToggleButton.setAttribute("aria-label", "メニューを開く");
+      };
+      elements.menuToggleButton.addEventListener("click", () => {
+        const isOpen = elements.mainMenu.classList.toggle("is-menu-open");
+        elements.menuToggleButton.setAttribute("aria-expanded", String(isOpen));
+        elements.menuToggleButton.setAttribute("aria-label", isOpen ? "メニューを閉じる" : "メニューを開く");
+      });
+      elements.mainMenu.addEventListener("click", event => {
+        if (event.target === elements.mainMenu) closeMainMenu();
+      });
+      document.addEventListener("click", event => {
+        if (!elements.mainMenu.contains(event.target) && !elements.menuToggleButton.contains(event.target)) closeMainMenu();
+      });
+      [elements.shareToggleButton, elements.settingsToggleButton, elements.timetableToggleButton].forEach(button => {
+        button.addEventListener("click", closeMainMenu);
       });
 
       // 共有ボタンおよびモーダル関連のイベントリスナー
