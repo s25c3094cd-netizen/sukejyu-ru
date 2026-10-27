@@ -2708,6 +2708,64 @@
       .day-holiday { font-size: 7px; }
     }
 
+
+
+    /* 2026-10 mobile readability and overflow hardening */
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    body { overflow-wrap: anywhere; }
+    .app, .layout, .calendar-panel, .selected-day-panel, .settings-page,
+    .settings-card, .timetable-panel, .timetable-form, .share-modal,
+    .event-form, .side-panel { min-width: 0; max-width: 100%; }
+    .share-modal-overlay, .class-status-overlay { padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); }
+    .share-modal, .class-status-dialog { width: min(100%, 620px); max-height: calc(100dvh - 24px); overflow-y: auto; }
+    .share-modal p, .share-modal label, .share-modal h2,
+    .event-form label, .settings-card label, .timetable-form label,
+    .schedule-title, .schedule-detail, .selected-date-title { overflow-wrap: anywhere; word-break: normal; }
+    input, select, textarea { min-width: 0; max-width: 100%; }
+    button { max-width: 100%; overflow-wrap: anywhere; }
+    .timetable-grid { width: 100%; table-layout: fixed; }
+    .timetable-grid th, .timetable-grid td { overflow-wrap: anywhere; word-break: normal; }
+    .calendar-month-label { color: var(--text) !important; }
+    .day-number { color: var(--text); }
+    .weekday { color: var(--muted); }
+    .share-modal { color: var(--text); background: var(--surface); }
+    .share-modal input, .share-modal textarea { color: var(--text); background: var(--surface-2); border-color: var(--border); }
+    .share-modal input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }
+    @media (max-width: 640px) {
+      .app { width: calc(100% - 16px); margin: 8px auto 24px; padding-left: 10px; padding-right: 10px; }
+      .app-header { flex-wrap: wrap; }
+      .app-header h1, h1, h2 { overflow-wrap: anywhere; }
+      .calendar-header { flex-wrap: nowrap !important; }
+      .calendar-header h1 { flex: 1 1 auto; }
+      .menu-toggle-btn { flex: 0 0 44px; width: 44px; height: 44px; }
+      .calendar-header .header-actions { width: 100%; max-width: none; }
+      .calendar-header .header-actions button { flex: 0 0 auto; min-height: 54px; }
+      .calendar-panel, .selected-day-panel, .settings-card, .timetable-panel { padding: 12px; }
+      .calendar-month-label { font-size: clamp(17px, 5vw, 22px); white-space: nowrap; }
+      .weekday { padding: 8px 1px; font-size: clamp(10px, 2.8vw, 12px); }
+      .day { min-height: 62px; padding: 4px 2px; }
+      .day-number { max-width: 100%; }
+      .event-chip, .event-count, .more-events { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+      .day-holiday { font-size: clamp(7px, 2vw, 10px); line-height: 1.2; }
+      .form-grid, .settings-grid, .share-date-row { grid-template-columns: minmax(0, 1fr); }
+      .form-group, .settings-card, .timetable-form .form-group { min-width: 0; }
+      .schedule-top { flex-wrap: wrap; }
+      .schedule-title { min-width: 0; }
+      .schedule-actions { min-width: 0; }
+      #add-event-btn { max-width: calc(100vw - 24px); right: max(12px, env(safe-area-inset-right)); padding: 0 14px; }
+      .share-modal-actions { display: grid; grid-template-columns: minmax(0,1fr); }
+      .share-modal-actions button { width: 100%; }
+    }
+    @media (max-width: 380px) {
+      .app { width: calc(100% - 10px); padding-left: 7px; padding-right: 7px; }
+      .calendar-panel, .selected-day-panel, .settings-card, .timetable-panel { padding: 8px 6px; }
+      .day { min-height: 54px; }
+      .day-holiday { font-size: 7px; }
+      .calendar-month-bar { padding-left: 38px; padding-right: 38px; }
+      .calendar-month-bar .icon-button { flex-basis: 34px; width: 34px; height: 34px; }
+      #add-event-btn { max-width: calc(100vw - 20px); font-size: 13px; }
+    }
+
 </style></head>
 
 <body>
