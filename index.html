@@ -2261,30 +2261,7 @@
       color: var(--muted);
       font-size: 14px;
     }
-    .share-url-box {
-      display: grid;
-      gap: 6px;
-    }
-    .share-url-input {
-      font-size: 13px;
-      background: var(--surface-2);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 10px;
-      word-break: break-all;
-    }
-    .share-choice-list { display: grid; gap: 10px; }
-    .share-choice-list > button { width: 100%; min-height: 44px; }
-    .share-date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); }
-    .share-date-row label { grid-column: 1 / -1; }
-    .share-date-row input { min-width: 0; }
-    .share-date-row button { min-width: 0; padding: 0 10px; }
-    #open-share-url-btn { width: 100%; }
-    .share-url-input { width: 100%; min-height: 70px; resize: vertical; }
     @media (max-width: 480px) {
-      .share-date-row { grid-template-columns: 1fr; }
-      .share-date-row label { grid-column: auto; }
     }
     .share-modal-actions {
       display: flex;
@@ -2315,8 +2292,6 @@
       .schedule-actions button { min-height: 40px; width: auto; }
       .share-modal-actions { flex-direction: column; }
       .share-modal-actions button { width: 100%; min-height: 44px; }
-      .share-date-row { grid-template-columns: minmax(0, 1fr); }
-      .share-date-row label { grid-column: auto; }
       .form-grid, .settings-grid { grid-template-columns: minmax(0, 1fr); }
     }
     @media (max-width: 380px) {
@@ -2747,7 +2722,7 @@
       .day-number { max-width: 100%; }
       .event-chip, .event-count, .more-events { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
       .day-holiday { font-size: clamp(7px, 2vw, 10px); line-height: 1.2; }
-      .form-grid, .settings-grid, .share-date-row { grid-template-columns: minmax(0, 1fr); }
+      .form-grid, .settings-grid { grid-template-columns: minmax(0, 1fr); }
       .form-group, .settings-card, .timetable-form .form-group { min-width: 0; }
       .schedule-top { flex-wrap: wrap; }
       .schedule-title { min-width: 0; }
@@ -3129,27 +3104,26 @@
 
   </main>
 
-  <!-- URL共有モーダル -->
+  <!-- JSONデータ共有モーダル -->
   <div class="share-modal-overlay" id="share-modal-overlay">
     <div class="share-modal" role="dialog" aria-modal="true" aria-labelledby="share-modal-title">
-      <h2 id="share-modal-title">スケジュールをURLで共有</h2>
-      <p>共有する内容を選ぶと、このスケジュール帳内で共有URLを作成します。URLを開くと共有データをこの帳面に取り込めます。</p>
+      <h2 id="share-modal-title">予定データの共有</h2>
+      <p>JSONの内容を確認してコピーするか、自分でダウンロードできます。読み込み時は既存データを残し、重複を避けて追加します。</p>
       <div class="share-choice-list">
-        <button class="primary-button" id="share-all-btn" type="button">すべての予定を共有</button>
-        <div class="share-date-row">
-          <label for="share-date-input">日付を選んで共有</label>
-          <input type="date" id="share-date-input">
-          <button class="secondary-button" id="share-date-btn" type="button">この日を共有</button>
-        </div>
-        <button class="secondary-button" id="share-timetable-btn" type="button">時間割を共有</button>
+        <button class="primary-button" id="export-json-btn" type="button">JSONを表示する</button>
+        <button class="secondary-button" id="import-json-btn" type="button">JSONファイルを読み込む</button>
+        <input type="file" id="import-json-file" accept=".json,application/json" hidden>
       </div>
-      <div class="share-url-box">
-        <label for="share-url-input">共有URL（直接入力・編集できます）</label>
-        <input type="text" id="share-url-input" class="share-url-input" placeholder="共有方法を選ぶか、共有URLを貼り付けてください">
-        <button class="secondary-button" id="open-share-url-btn" type="button">入力したURLを読み込む</button>
+      <div id="json-export-panel" hidden style="display:none; gap:10px;">
+        <label for="json-export-text">JSONデータ（必要なら全選択してコピー）</label>
+        <textarea id="json-export-text" rows="8" spellcheck="false" style="width:100%; min-height:150px; resize:vertical; font-family:monospace; font-size:12px;"></textarea>
+        <div class="share-choice-list">
+          <button class="secondary-button" id="copy-json-btn" type="button">JSONをコピー</button>
+          <button class="primary-button" id="download-json-btn" type="button">JSONをダウンロード</button>
+        </div>
+        <p>「ダウンロード」を押すまでファイルは保存されません。</p>
       </div>
       <div class="share-modal-actions">
-        <button class="secondary-button" id="copy-share-url-btn" type="button">URLをコピー</button>
         <button class="primary-button" id="close-share-modal-btn" type="button">閉じる</button>
       </div>
     </div>
@@ -3280,13 +3254,13 @@
         mainMenu: document.getElementById("main-menu"),
         shareToggleButton: document.getElementById("share-toggle-btn"),
         shareModalOverlay: document.getElementById("share-modal-overlay"),
-        shareUrlInput: document.getElementById("share-url-input"),
-        shareDateInput: document.getElementById("share-date-input"),
-        shareAllButton: document.getElementById("share-all-btn"),
-        shareDateButton: document.getElementById("share-date-btn"),
-        shareTimetableButton: document.getElementById("share-timetable-btn"),
-        openShareUrlButton: document.getElementById("open-share-url-btn"),
-        copyShareUrlButton: document.getElementById("copy-share-url-btn"),
+        exportJsonButton: document.getElementById("export-json-btn"),
+        jsonExportPanel: document.getElementById("json-export-panel"),
+        jsonExportText: document.getElementById("json-export-text"),
+        copyJsonButton: document.getElementById("copy-json-btn"),
+        downloadJsonButton: document.getElementById("download-json-btn"),
+        importJsonButton: document.getElementById("import-json-btn"),
+        importJsonFile: document.getElementById("import-json-file"),
         closeShareModalButton: document.getElementById("close-share-modal-btn"),
 
         settingsToggleButton: document.getElementById("settings-toggle-btn"),
@@ -3384,9 +3358,6 @@
 
       const today = stripTime(new Date());
 
-      // 起動時にURLハッシュ（#data=...）からデータが渡されているかチェックしてインポートする
-      checkAndImportShareData();
-
       const savedGroups = loadGroups();
 
       let showJapaneseHolidays = false;
@@ -3448,148 +3419,142 @@
         }
       }
 
-      // URL共有：必要な種類のデータだけをURLに含め、外部サーバーは使いません。
-      function decodeSharePayload(encoded) {
-        // URL-safe Base64 に対応
-        const normalized = encoded.replace(/-/g, "+").replace(/_/g, "/");
-        const binary = atob(normalized);
-        const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
-        return JSON.parse(new TextDecoder().decode(bytes));
+      // JSONファイル共有：インポートは既存データを置き換えず、重複を避けて追加します。
+      function collectBackupData() {
+        return {
+          format: "schedule-book-backup",
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          events: loadJson(STORAGE_KEYS.events, []),
+          groups: loadJson(STORAGE_KEYS.groups, DEFAULT_GROUPS),
+          reminders: loadJson(STORAGE_KEYS.reminders, {}),
+          timetable: loadJson(STORAGE_KEYS.timetable, []),
+          timetableSettings: loadJson(STORAGE_KEYS.timetableSettings, null),
+          classDayOverrides: loadJson(STORAGE_KEYS.classDayOverrides, {}),
+          theme: localStorage.getItem("calendarThemeModeV2") || null
+        };
       }
 
-      function checkAndImportShareData() {
+      function exportJsonBackup() {
         try {
-          const hash = window.location.hash;
-          if (!hash.startsWith("#data=")) return;
-          const data = decodeSharePayload(hash.slice(6));
-          if (!data || typeof data !== "object") throw new Error("共有データが不正です");
+          const data = collectBackupData();
+          elements.jsonExportText.value = JSON.stringify(data, null, 2);
+          elements.jsonExportPanel.hidden = false;
+          elements.jsonExportPanel.style.display = "grid";
+          elements.jsonExportText.focus();
+          elements.jsonExportText.select();
+        } catch (error) {
+          console.error("JSONの作成に失敗しました", error);
+          alert("JSONを作成できませんでした。");
+        }
+      }
 
-          if (data.shareMode === "day" && data.date && Array.isArray(data.events)) {
-            const current = JSON.parse(localStorage.getItem(STORAGE_KEYS.events) || "[]");
-            const otherDates = current.filter(event => event.date !== data.date);
-            localStorage.setItem(STORAGE_KEYS.events, JSON.stringify([...otherDates, ...data.events]));
+      async function copyJsonBackup() {
+        const text = elements.jsonExportText.value;
+        if (!text) return alert("先に「JSONを表示する」を押してください。");
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
           } else {
-            if (Array.isArray(data.events)) localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(data.events));
+            elements.jsonExportText.focus();
+            elements.jsonExportText.select();
+            const copied = document.execCommand("copy");
+            if (!copied) throw new Error("コピーできませんでした");
           }
-          if (Array.isArray(data.groups)) localStorage.setItem(STORAGE_KEYS.groups, JSON.stringify(data.groups));
-          if (data.reminders && typeof data.reminders === "object") localStorage.setItem(STORAGE_KEYS.reminders, JSON.stringify(data.reminders));
-          if (Array.isArray(data.timetable)) localStorage.setItem(STORAGE_KEYS.timetable, JSON.stringify(data.timetable));
-          if (data.timetableSettings && typeof data.timetableSettings === "object") localStorage.setItem(STORAGE_KEYS.timetableSettings, JSON.stringify(data.timetableSettings));
-          if (data.classDayOverrides && typeof data.classDayOverrides === "object") {
-            const currentOverrides = JSON.parse(localStorage.getItem(STORAGE_KEYS.classDayOverrides) || "{}");
-            localStorage.setItem(STORAGE_KEYS.classDayOverrides, JSON.stringify({ ...currentOverrides, ...data.classDayOverrides }));
+          alert("JSONをコピーしました。貼り付け先にペーストしてください。");
+        } catch (error) {
+          elements.jsonExportText.focus();
+          elements.jsonExportText.select();
+          alert("自動コピーできませんでした。選択されたJSONを手動でコピーしてください。");
+        }
+      }
+
+      function downloadJsonBackup() {
+        const text = elements.jsonExportText.value;
+        if (!text) return alert("先に「JSONを表示する」を押してください。");
+        try {
+          const blob = new Blob([text], { type: "application/json;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          const stamp = new Date().toISOString().slice(0, 10);
+          link.href = url;
+          link.download = `schedule-book-${stamp}.json`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (error) {
+          console.error("JSONダウンロードに失敗しました", error);
+          alert("ダウンロードできませんでした。JSON欄をコピーしてテキストファイルに保存してください。");
+        }
+      }
+
+      function mergeBySignature(existing, incoming, signatureFields, prefix) {
+        const result = Array.isArray(existing) ? [...existing] : [];
+        const signatures = new Set(result.map(item => signatureFields.map(key => String(item?.[key] ?? "")).join("\u001f")));
+        const ids = new Set(result.map(item => item?.id).filter(Boolean));
+        let added = 0;
+        for (const original of (Array.isArray(incoming) ? incoming : [])) {
+          if (!original || typeof original !== "object") continue;
+          const item = { ...original };
+          const sig = signatureFields.map(key => String(item[key] ?? "")).join("\u001f");
+          if (signatures.has(sig)) continue;
+          if (item.id && ids.has(item.id)) item.id = `${prefix}-import-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+          if (!item.id) item.id = `${prefix}-import-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+          result.push(item);
+          signatures.add(sig);
+          ids.add(item.id);
+          added++;
+        }
+        return { result, added };
+      }
+
+      async function importJsonBackup(file) {
+        if (!file) return;
+        try {
+          if (file.size > 20 * 1024 * 1024) throw new Error("ファイルが大きすぎます（20MBまで）。");
+          const parsed = JSON.parse(await file.text());
+          const data = parsed?.data && typeof parsed.data === "object" ? parsed.data : parsed;
+          if (!data || typeof data !== "object" || (!Array.isArray(data.events) && !Array.isArray(data.timetable))) {
+            throw new Error("スケジュール帳のJSONファイルではありません。");
           }
-          if (data.theme) localStorage.setItem("calendarThemeModeV2", data.theme);
+          const currentEvents = loadJson(STORAGE_KEYS.events, []);
+          const eventsMerge = mergeBySignature(currentEvents, data.events || [], ["date", "time", "endTime", "title", "group", "detail"], "event");
+          const currentTimetable = loadJson(STORAGE_KEYS.timetable, []);
+          const timetableMerge = mergeBySignature(currentTimetable, data.timetable || [], ["dayOfWeek", "startPeriod", "period", "title", "grade", "term", "room", "teacher"], "class");
+          const currentGroups = loadJson(STORAGE_KEYS.groups, DEFAULT_GROUPS);
+          const groups = [...new Set([...(Array.isArray(currentGroups) ? currentGroups : DEFAULT_GROUPS), ...(Array.isArray(data.groups) ? data.groups : [])])];
+          const currentReminders = loadJson(STORAGE_KEYS.reminders, {});
+          const reminders = { ...(currentReminders && typeof currentReminders === "object" ? currentReminders : {}), ...(data.reminders && typeof data.reminders === "object" ? data.reminders : {}) };
+          const currentOverrides = loadJson(STORAGE_KEYS.classDayOverrides, {});
+          const overrides = { ...(currentOverrides && typeof currentOverrides === "object" ? currentOverrides : {}), ...(data.classDayOverrides && typeof data.classDayOverrides === "object" ? data.classDayOverrides : {}) };
 
-          window.history.replaceState(null, "", window.location.pathname + window.location.search);
-          const message = data.shareMode === "day" ? `${data.date} の予定を読み込みました。`
-            : data.shareMode === "timetable" ? "時間割を読み込みました。"
-            : "共有されたスケジュールを読み込みました。";
-          setTimeout(() => alert(message), 0);
-        } catch (e) {
-          console.error("共有データの読み込みに失敗しました", e);
-          setTimeout(() => alert("共有URLを読み込めませんでした。URLが正しいか確認してください。"), 0);
+          // すべてのマージ処理が成功してから保存。既存の時間割設定・テーマは上書きしません。
+          saveJson(STORAGE_KEYS.events, eventsMerge.result);
+          saveJson(STORAGE_KEYS.timetable, timetableMerge.result);
+          saveJson(STORAGE_KEYS.groups, groups);
+          saveJson(STORAGE_KEYS.reminders, reminders);
+          saveJson(STORAGE_KEYS.classDayOverrides, overrides);
+          if (!localStorage.getItem(STORAGE_KEYS.timetableSettings) && data.timetableSettings && typeof data.timetableSettings === "object") {
+            saveJson(STORAGE_KEYS.timetableSettings, data.timetableSettings);
+          }
+          if (!localStorage.getItem("calendarThemeModeV2") && data.theme) localStorage.setItem("calendarThemeModeV2", data.theme);
+          alert(`読み込みました。\n追加した予定：${eventsMerge.added}件\n追加した授業：${timetableMerge.added}件\n\n既存データは削除していません。画面を更新します。`);
+          window.location.reload();
+        } catch (error) {
+          console.error("JSON読み込みに失敗しました", error);
+          alert(`読み込みに失敗しました。\n${error.message || "ファイルの内容を確認してください。"}`);
+        } finally {
+          if (elements.importJsonFile) elements.importJsonFile.value = "";
         }
-      }
-
-      function encodeShareData(data) {
-        const bytes = new TextEncoder().encode(JSON.stringify(data));
-        let binary = "";
-        // apply の引数上限を避けるため小分けに変換
-        for (let i = 0; i < bytes.length; i += 0x8000) {
-          binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-        }
-        return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-      }
-
-      function generateShareUrl(mode, date = "") {
-        let data;
-        if (mode === "day") {
-          data = {
-            shareMode: "day",
-            date,
-            events: loadJson(STORAGE_KEYS.events, []).filter(event => event && event.date === date),
-            classDayOverrides: Object.fromEntries(Object.entries(loadJson(STORAGE_KEYS.classDayOverrides, {})).filter(([key]) => key.startsWith(`${date}::`)))
-          };
-        } else if (mode === "timetable") {
-          data = {
-            shareMode: "timetable",
-            timetable: loadJson(STORAGE_KEYS.timetable, []),
-            timetableSettings: loadJson(STORAGE_KEYS.timetableSettings, {}),
-            classDayOverrides: loadJson(STORAGE_KEYS.classDayOverrides, {})
-          };
-        } else {
-          data = {
-            shareMode: "all",
-            events: loadJson(STORAGE_KEYS.events, []),
-            groups: loadJson(STORAGE_KEYS.groups, DEFAULT_GROUPS),
-            reminders: loadJson(STORAGE_KEYS.reminders, {}),
-            timetable: loadJson(STORAGE_KEYS.timetable, []),
-            timetableSettings: loadJson(STORAGE_KEYS.timetableSettings, {}),
-            classDayOverrides: loadJson(STORAGE_KEYS.classDayOverrides, {}),
-            theme: localStorage.getItem("calendarThemeModeV2") || "light"
-          };
-        }
-        const baseUrl = window.location.href.split("#")[0];
-        return `${baseUrl}#data=${encodeShareData(data)}`;
-      }
-
-      function createShareUrl(mode, date = "") {
-        if (mode === "day" && !date) {
-          alert("共有する日付を選択してください。");
-          return;
-        }
-        elements.shareUrlInput.value = generateShareUrl(mode, date);
       }
 
       function openShareModal() {
-        elements.shareDateInput.value = formatDateKey(state.selectedDate || new Date());
-        elements.shareUrlInput.value = "";
         elements.shareModalOverlay.classList.add("is-active");
       }
 
       function closeShareModal() {
         elements.shareModalOverlay.classList.remove("is-active");
-      }
-
-      function copyShareUrl() {
-        const url = elements.shareUrlInput.value.trim();
-        if (!url) {
-          alert("先に共有方法を選んでURLを作成するか、URLを入力してください。");
-          return;
-        }
-        if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(url).then(() => alert("共有URLをコピーしました。"))
-            .catch(() => fallbackCopyShareUrl());
-        } else {
-          fallbackCopyShareUrl();
-        }
-      }
-
-      function fallbackCopyShareUrl() {
-        elements.shareUrlInput.focus();
-        elements.shareUrlInput.select();
-        try {
-          const copied = document.execCommand("copy");
-          alert(copied ? "共有URLをコピーしました。" : "URLを選択して手動でコピーしてください。");
-        } catch {
-          alert("URLを選択して手動でコピーしてください。");
-        }
-      }
-
-      function openEnteredShareUrl() {
-        const raw = elements.shareUrlInput.value.trim();
-        if (!raw) {
-          alert("共有URLを入力してください。");
-          return;
-        }
-        try {
-          const url = new URL(raw, window.location.href);
-          if (!url.hash.startsWith("#data=")) throw new Error("共有データがありません");
-          window.location.href = url.href;
-        } catch (error) {
-          alert("有効な共有URLを入力してください。");
-        }
       }
 
       function loadEvents() {
@@ -6209,12 +6174,12 @@
 
       // 共有ボタンおよびモーダル関連のイベントリスナー
       elements.shareToggleButton.addEventListener("click", openShareModal);
-      elements.shareAllButton.addEventListener("click", () => createShareUrl("all"));
-      elements.shareDateButton.addEventListener("click", () => createShareUrl("day", elements.shareDateInput.value));
-      elements.shareTimetableButton.addEventListener("click", () => createShareUrl("timetable"));
-      elements.openShareUrlButton.addEventListener("click", openEnteredShareUrl);
+      elements.exportJsonButton.addEventListener("click", exportJsonBackup);
+      elements.copyJsonButton.addEventListener("click", copyJsonBackup);
+      elements.downloadJsonButton.addEventListener("click", downloadJsonBackup);
+      elements.importJsonButton.addEventListener("click", () => elements.importJsonFile.click());
+      elements.importJsonFile.addEventListener("change", event => importJsonBackup(event.target.files?.[0]));
       elements.closeShareModalButton.addEventListener("click", closeShareModal);
-      elements.copyShareUrlButton.addEventListener("click", copyShareUrl);
       elements.shareModalOverlay.addEventListener("click", event => {
         if (event.target === elements.shareModalOverlay) {
           closeShareModal();
