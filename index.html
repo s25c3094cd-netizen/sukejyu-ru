@@ -723,10 +723,6 @@
     .deadline-badge { display:inline-block; border-radius:6px; padding:3px 7px; font-size:12px; font-weight:700; background:var(--surface-2); }
     .deadline-badge.is-today { color:#b42318; background:#fee4e2; }
     .deadline-badge.is-soon { color:#9a6700; background:#fff1c2; }
-    .deadline-badge.is-urgent, .deadline-badge.is-overdue { color:#fff; background:#b42318; }
-    .schedule-item.is-deadline-urgent { border:2px solid #c62828 !important; box-shadow:0 0 0 3px rgba(198,40,40,.13) !important; }
-    .schedule-item.is-deadline-urgent .schedule-title::before { content:"⚠ "; color:#c62828; }
-    :root[data-theme="dark"] .deadline-badge.is-urgent, :root[data-theme="dark"] .deadline-badge.is-overdue { background:#8f1d24; color:#fff; }
     .task-progress-actions { display:flex; align-items:center; justify-content:flex-end; gap:8px; flex:0 0 auto; margin:0 0 0 auto; }
     .task-state-label { display:inline-flex; align-items:center; padding:4px 8px; border-radius:999px; background:var(--surface-2); color:var(--muted); border:1px solid var(--border); font-size:12px; line-height:1.2; white-space:nowrap; }
     .task-state-button { min-height:34px; padding:6px 12px; border:1px solid var(--accent); border-radius:8px; background:var(--accent); color:#fff; font-size:12px; font-weight:700; cursor:pointer; touch-action:manipulation; white-space:nowrap; }
@@ -2218,21 +2214,6 @@
     button, a, input, select, textarea { touch-action: manipulation; }
     img, canvas, svg { max-width: 100%; }
     .schedule-item, .settings-card, .group-row, .reminder-row { min-width: 0; }
-    input, select, textarea, button { max-width: 100%; }
-    @media (max-width: 640px) {
-      .form-grid { grid-template-columns: minmax(0, 1fr) !important; }
-      .timetable-panel, .selected-day-panel, .today-task-section, .settings-panel { padding: 12px !important; }
-      .calendar-month-bar { flex-wrap: wrap; }
-      .calendar-month-title { flex: 1 1 100%; order: -1; text-align:center; }
-      .calendar-grid { gap: 3px; }
-      .day { min-width: 0; overflow: hidden; }
-      .day-holiday { font-size: 9px; overflow-wrap:anywhere; }
-      .reminder-row { grid-template-columns: minmax(0,1fr) !important; }
-      .reminder-select { min-height: 96px; }
-      .schedule-top { flex-wrap: wrap; }
-      .schedule-actions { flex-wrap: wrap; }
-      .timeline-event { max-width: calc(100vw - 110px); }
-    }
     .schedule-title, .schedule-detail, .schedule-time, .schedule-reminder { overflow-wrap: anywhere; }
     @media (max-width: 640px) {
       .app { width: calc(100% - 16px); margin: 8px auto 24px; }
@@ -2484,6 +2465,68 @@
       overflow: hidden;
     }
 
+
+    /* iPhone向けカレンダー配置の最終調整 */
+    @media (max-width: 600px) {
+      .calendar-month-bar {
+        display: grid !important;
+        grid-template-columns: 40px minmax(0, 1fr) 40px;
+        grid-template-areas:
+          "prev title next"
+          "today today holiday";
+        align-items: center;
+        justify-content: stretch;
+        gap: 10px 8px;
+        min-height: 0;
+        padding: 12px 10px 14px !important;
+        margin-bottom: 8px;
+      }
+      .calendar-month-bar #prev-month { grid-area: prev; margin: 0; position: static; }
+      .calendar-month-bar #next-month { grid-area: next; margin: 0; position: static; }
+      .calendar-month-bar .calendar-month-label {
+        grid-area: title;
+        position: static;
+        transform: none;
+        width: auto;
+        min-width: 0;
+        text-align: center;
+      }
+      .calendar-month-bar .month-title {
+        font-size: clamp(19px, 5.2vw, 24px);
+        white-space: nowrap;
+      }
+      .calendar-month-bar .calendar-today-button {
+        grid-area: today;
+        justify-self: stretch;
+        width: 100%;
+        min-width: 0;
+        min-height: 38px;
+        padding: 8px 10px;
+        font-size: 13px;
+      }
+      .calendar-month-bar .holiday-toggle-button {
+        grid-area: holiday;
+        justify-self: stretch;
+        width: 100%;
+        min-width: 0;
+        min-height: 38px;
+        padding: 8px 7px;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .calendar-month-bar .icon-button { width: 40px; height: 40px; }
+      .weekdays, .days { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+      .day { min-width: 0; padding: 4px 1px; overflow: hidden; }
+      .day-number { font-size: 13px; }
+      .day-holiday { font-size: 9px; line-height: 1.15; margin-top: 2px; }
+    }
+    @media (max-width: 380px) {
+      .calendar-month-bar { grid-template-columns: 36px minmax(0, 1fr) 36px; gap: 8px 5px; padding-left: 7px !important; padding-right: 7px !important; }
+      .calendar-month-bar .icon-button { width: 36px; height: 36px; }
+      .calendar-month-bar .calendar-today-button,
+      .calendar-month-bar .holiday-toggle-button { font-size: 11px; padding: 7px 4px; }
+      .day-holiday { font-size: 8px; }
+    }
 </style></head>
 
 <body>
@@ -3177,74 +3220,36 @@
       }
 
       function checkAndImportShareData() {
-        const clearShareHash = () => {
-          try { window.history.replaceState(null, "", window.location.pathname + window.location.search); } catch (_) {}
-        };
         try {
-          const hash = window.location.hash || "";
+          const hash = window.location.hash;
           if (!hash.startsWith("#data=")) return;
-          const encoded = hash.slice(6);
-          // 異常に大きいURLや壊れたURLでブラウザを重くしない
-          if (!encoded || encoded.length > 1_500_000) throw new Error("共有データが大きすぎます");
-          const data = decodeSharePayload(encoded);
-          if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("共有データが不正です");
-          const validMode = ["day", "timetable", "all"].includes(data.shareMode);
-          if (!validMode) throw new Error("共有方法が不正です");
-          if (data.shareMode === "day" && (!/^\d{4}-\d{2}-\d{2}$/.test(data.date || "") || !Array.isArray(data.events))) {
-            throw new Error("日付共有データが不正です");
-          }
-          if (data.events !== undefined && !Array.isArray(data.events)) throw new Error("予定データが不正です");
-          if (data.timetable !== undefined && !Array.isArray(data.timetable)) throw new Error("時間割データが不正です");
-          if (data.groups !== undefined && (!Array.isArray(data.groups) || !data.groups.every(x => typeof x === "string"))) throw new Error("グループデータが不正です");
+          const data = decodeSharePayload(hash.slice(6));
+          if (!data || typeof data !== "object") throw new Error("共有データが不正です");
 
-          const existingEvents = loadJson(STORAGE_KEYS.events, []);
-          const existingTimetable = loadJson(STORAGE_KEYS.timetable, []);
-          const hasExistingData = (Array.isArray(existingEvents) && existingEvents.length > 0) || (Array.isArray(existingTimetable) && existingTimetable.length > 0);
-          const summary = data.shareMode === "day" ? `${data.date} の予定 ${data.events.length} 件`
-            : data.shareMode === "timetable" ? `時間割 ${data.timetable?.length || 0} 件`
-            : `予定 ${data.events?.length || 0} 件、時間割 ${data.timetable?.length || 0} 件`;
-          const warning = data.shareMode === "day"
-            ? `共有データ（${summary}）を取り込みます。選択日の既存予定は共有内容に置き換わります。よろしいですか？`
-            : data.shareMode === "timetable"
-              ? `共有データ（${summary}）を取り込みます。現在の時間割は共有内容に置き換わります。よろしいですか？`
-              : `共有データ（${summary}）を取り込みます。${hasExistingData ? "この端末の既存の予定・時間割など一部データが置き換わります。必要なら先に別の共有URLで保存してください。\n\n" : ""}続行しますか？`;
-          if (!window.confirm(warning)) {
-            clearShareHash();
-            return;
-          }
-
-          if (data.shareMode === "day") {
-            const current = Array.isArray(existingEvents) ? existingEvents : [];
-            const otherDates = current.filter(event => event && event.date !== data.date);
-            const imported = data.events.filter(event => event && event.date === data.date);
-            localStorage.setItem(STORAGE_KEYS.events, JSON.stringify([...otherDates, ...imported]));
-            const incomingOverrides = data.classDayOverrides && typeof data.classDayOverrides === "object" ? data.classDayOverrides : {};
-            const currentOverrides = loadJson(STORAGE_KEYS.classDayOverrides, {});
-            const mergedOverrides = { ...(currentOverrides && typeof currentOverrides === "object" ? currentOverrides : {}) };
-            Object.keys(mergedOverrides).forEach(key => { if (key.startsWith(`${data.date}::`)) delete mergedOverrides[key]; });
-            Object.assign(mergedOverrides, incomingOverrides);
-            localStorage.setItem(STORAGE_KEYS.classDayOverrides, JSON.stringify(mergedOverrides));
-          } else if (data.shareMode === "timetable") {
-            localStorage.setItem(STORAGE_KEYS.timetable, JSON.stringify(data.timetable || []));
-            if (data.timetableSettings && typeof data.timetableSettings === "object") localStorage.setItem(STORAGE_KEYS.timetableSettings, JSON.stringify(data.timetableSettings));
-            if (data.classDayOverrides && typeof data.classDayOverrides === "object") localStorage.setItem(STORAGE_KEYS.classDayOverrides, JSON.stringify(data.classDayOverrides));
+          if (data.shareMode === "day" && data.date && Array.isArray(data.events)) {
+            const current = JSON.parse(localStorage.getItem(STORAGE_KEYS.events) || "[]");
+            const otherDates = current.filter(event => event.date !== data.date);
+            localStorage.setItem(STORAGE_KEYS.events, JSON.stringify([...otherDates, ...data.events]));
           } else {
             if (Array.isArray(data.events)) localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(data.events));
-            if (Array.isArray(data.groups)) localStorage.setItem(STORAGE_KEYS.groups, JSON.stringify(data.groups));
-            if (data.reminders && typeof data.reminders === "object" && !Array.isArray(data.reminders)) localStorage.setItem(STORAGE_KEYS.reminders, JSON.stringify(data.reminders));
-            if (Array.isArray(data.timetable)) localStorage.setItem(STORAGE_KEYS.timetable, JSON.stringify(data.timetable));
-            if (data.timetableSettings && typeof data.timetableSettings === "object" && !Array.isArray(data.timetableSettings)) localStorage.setItem(STORAGE_KEYS.timetableSettings, JSON.stringify(data.timetableSettings));
-            if (data.classDayOverrides && typeof data.classDayOverrides === "object" && !Array.isArray(data.classDayOverrides)) localStorage.setItem(STORAGE_KEYS.classDayOverrides, JSON.stringify(data.classDayOverrides));
-            if (typeof data.theme === "string") localStorage.setItem("calendarThemeModeV2", data.theme === "dark" ? "dark" : "light");
           }
-          clearShareHash();
+          if (Array.isArray(data.groups)) localStorage.setItem(STORAGE_KEYS.groups, JSON.stringify(data.groups));
+          if (data.reminders && typeof data.reminders === "object") localStorage.setItem(STORAGE_KEYS.reminders, JSON.stringify(data.reminders));
+          if (Array.isArray(data.timetable)) localStorage.setItem(STORAGE_KEYS.timetable, JSON.stringify(data.timetable));
+          if (data.timetableSettings && typeof data.timetableSettings === "object") localStorage.setItem(STORAGE_KEYS.timetableSettings, JSON.stringify(data.timetableSettings));
+          if (data.classDayOverrides && typeof data.classDayOverrides === "object") {
+            const currentOverrides = JSON.parse(localStorage.getItem(STORAGE_KEYS.classDayOverrides) || "{}");
+            localStorage.setItem(STORAGE_KEYS.classDayOverrides, JSON.stringify({ ...currentOverrides, ...data.classDayOverrides }));
+          }
+          if (data.theme) localStorage.setItem("calendarThemeModeV2", data.theme);
+
+          window.history.replaceState(null, "", window.location.pathname + window.location.search);
           const message = data.shareMode === "day" ? `${data.date} の予定を読み込みました。`
             : data.shareMode === "timetable" ? "時間割を読み込みました。"
             : "共有されたスケジュールを読み込みました。";
           setTimeout(() => alert(message), 0);
         } catch (e) {
           console.error("共有データの読み込みに失敗しました", e);
-          clearShareHash();
           setTimeout(() => alert("共有URLを読み込めませんでした。URLが正しいか確認してください。"), 0);
         }
       }
@@ -3296,11 +3301,7 @@
           alert("共有する日付を選択してください。");
           return;
         }
-        const url = generateShareUrl(mode, date);
-        elements.shareUrlInput.value = url;
-        if (url.length > 6000) {
-          alert(`共有URLが長くなっています（約${url.length.toLocaleString()}文字）。アプリやメッセージサービスによっては途中で切れることがあります。「この日を共有」など、必要なデータだけを選んでください。`);
-        }
+        elements.shareUrlInput.value = generateShareUrl(mode, date);
       }
 
       function openShareModal() {
@@ -3510,7 +3511,7 @@
 
             enabled: Boolean(saved.enabled),
 
-            minutesBefore: normalizeReminderMinutes(saved.minutesBefore ?? (Array.isArray(saved.minutesBeforeList) ? saved.minutesBeforeList[0] : 10)),
+            minutesBefore: normalizeReminderMinutes(saved.minutesBefore),
 
             showInReminders: saved.showInReminders !== false,
 
@@ -3546,13 +3547,6 @@
 
       }
 
-
-      function normalizeReminderMinutesList(values, fallback) {
-        const source = Array.isArray(values) ? values : [fallback == null ? 10 : fallback];
-        const normalized = [...new Set(source.map(normalizeReminderMinutes))].sort((a,b) => b-a);
-        return normalized.length ? normalized : [10];
-      }
-
       function getReminderOptionLabel(minutesBefore) {
 
         const option = REMINDER_OPTIONS.find(item => item.value === minutesBefore);
@@ -3581,9 +3575,7 @@
 
             enabled: false,
 
-            minutesBefore: 10,
-            showInReminders: true,
-            showInTasks: true
+            minutesBefore: 10
 
           };
 
@@ -3707,17 +3699,13 @@
         else if (year >= 1966) add(10, 10, "体育の日");
         add(11, 3, "文化の日");
         add(11, 23, "勤労感謝の日");
-        // 2019年の特例休日は国民の休日計算より先に登録する
-        if (year === 2019) { add(5, 1, "天皇の即位の日"); add(10, 22, "即位礼正殿の儀"); }
-        // 国民の休日（祝日に挟まれた平日）を年内すべての月で判定
-        for (let d = 1; d <= 365 + (new Date(year, 1, 29).getMonth() === 1 ? 1 : 0); d++) {
-          const date = new Date(year, 0, d);
-          const key = formatDateKey(date);
-          const prevDate = new Date(year, 0, d - 1);
-          const nextDate = new Date(year, 0, d + 1);
-          const prev = formatDateKey(prevDate);
-          const next = formatDateKey(nextDate);
-          if (date.getFullYear() === year && !holidays.has(key) && holidays.has(prev) && holidays.has(next) && date.getDay() !== 0) holidays.set(key, "国民の休日");
+        // 国民の休日（祝日に挟まれた平日）
+        for (let d = 2; d < 31; d++) {
+          const date = new Date(year, 8, d);
+          const key = `${year}-09-${String(d).padStart(2,"0")}`;
+          const prev = `${year}-09-${String(d-1).padStart(2,"0")}`;
+          const next = `${year}-09-${String(d+1).padStart(2,"0")}`;
+          if (!holidays.has(key) && holidays.has(prev) && holidays.has(next) && date.getDay() !== 0) holidays.set(key, "国民の休日");
         }
         // 振替休日（祝日が日曜の場合、次の祝日でない日）
         const original = [...holidays.keys()].sort();
@@ -3734,6 +3722,8 @@
             holidays.set(skey, "振替休日");
           }
         }
+        // 2019年の特例休日
+        if (year === 2019) { add(5, 1, "天皇の即位の日"); add(10, 22, "即位礼正殿の儀"); }
         // 2020・2021年の五輪特例
         if (year === 2020) { holidays.delete("2020-07-20"); add(7, 23, "海の日"); add(7, 24, "スポーツの日"); add(8, 10, "山の日"); }
         if (year === 2021) { holidays.delete("2021-07-19"); add(7, 22, "海の日"); add(7, 23, "スポーツの日"); add(8, 8, "山の日"); add(8, 9, "振替休日"); }
@@ -3947,20 +3937,113 @@
       }
 
       function isTodayTask(event, now = new Date()) {
-        if (!event || (event.progress || "not-started") === "done") return false;
+
         const eventDate = parseDateKey(event.date);
-        if (!eventDate || Number.isNaN(eventDate.getTime())) return false;
-        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const eventDayStart = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
-        const setting = ensureReminderSetting(event.group || DEFAULT_GROUPS[0]);
-        const eventDateTime = getEventDateTime(event);
-        if (!setting.enabled) {
-          if (eventDayStart.getTime() !== todayStart.getTime()) return false;
-          return !eventDateTime || eventDateTime >= now;
+
+        if (!eventDate || Number.isNaN(eventDate.getTime())) {
+
+          return false;
+
         }
-        if (!eventDateTime || eventDateTime < now) return false;
-        const reminderAt = eventDateTime.getTime() - normalizeReminderMinutes(setting.minutesBefore) * 60000;
-        return now.getTime() >= reminderAt;
+
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        const eventDayStart = new Date(
+
+          eventDate.getFullYear(),
+
+          eventDate.getMonth(),
+
+          eventDate.getDate()
+
+        );
+
+        // リマインダーがOFFなら、予定当日だけタスク欄に表示する。
+
+        const setting = ensureReminderSetting(event.group || DEFAULT_GROUPS[0]);
+
+        if (!setting.enabled) {
+
+          if (eventDayStart.getTime() !== todayStart.getTime()) {
+
+            return false;
+
+          }
+
+          // 時間指定がある予定は、予定時刻を過ぎたらタスク欄から消す。
+
+          const eventDateTime = getEventDateTime(event);
+
+          return !eventDateTime || eventDateTime >= now;
+
+        }
+
+        const eventDateTime = getEventDateTime(event);
+
+        if (!eventDateTime) {
+
+          const reminderDate = new Date(
+
+            eventDayStart.getTime() - setting.minutesBefore * 60 * 1000
+
+          );
+
+          const reminderDayStart = new Date(
+
+            reminderDate.getFullYear(),
+
+            reminderDate.getMonth(),
+
+            reminderDate.getDate()
+
+          );
+
+          return (
+
+            todayStart.getTime() >= reminderDayStart.getTime() &&
+
+            todayStart.getTime() <= eventDayStart.getTime()
+
+          );
+
+        }
+
+        const reminderAt = new Date(
+
+          eventDateTime.getTime() - setting.minutesBefore * 60 * 1000
+
+        );
+
+        const reminderDayStart = new Date(
+
+          reminderAt.getFullYear(),
+
+          reminderAt.getMonth(),
+
+          reminderAt.getDate()
+
+        );
+
+        if (
+
+          todayStart.getTime() < reminderDayStart.getTime() ||
+
+          todayStart.getTime() > eventDayStart.getTime()
+
+        ) {
+
+          return false;
+
+        }
+
+        if (todayStart.getTime() === eventDayStart.getTime()) {
+
+          return eventDateTime >= now;
+
+        }
+
+        return true;
+
       }
 
       function getTodayTaskSortInfo(event, now = new Date()) {
@@ -4050,23 +4133,17 @@
 
       function getDeadlineInfo(event) {
         if (!event.date) return null;
-        const date = parseDateKey(event.date);
-        if (!date || Number.isNaN(date.getTime())) return null;
-        const deadline = event.time
-          ? getEventDateTime(event)
-          : new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
-        if (!deadline || Number.isNaN(deadline.getTime())) return null;
-        const remaining = deadline.getTime() - Date.now();
-        const hours = Math.ceil(remaining / 3600000);
-        if (remaining < 0) return { text: `期限超過 ${Math.ceil(Math.abs(remaining) / 86400000)}日`, cls: "is-overdue", urgent: true };
-        if (remaining <= 86400000) {
-          if (hours <= 1) return { text: `締切まで${Math.max(0, Math.ceil(remaining / 60000))}分`, cls: "is-urgent", urgent: true };
-          return { text: `締切まで約${hours}時間`, cls: "is-urgent", urgent: true };
-        }
-        const days = Math.ceil(remaining / 86400000);
-        if (days === 2) return { text: "明後日が締切", cls: "is-soon" };
+        const due = parseDateKey(event.date);
+        if (!due || Number.isNaN(due.getTime())) return null;
+        const todayDate = new Date();
+        const todayStart = new Date(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate());
+        const dueStart = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+        const days = Math.round((dueStart - todayStart) / 86400000);
+        if (days < 0) return { text: `期限超過 ${Math.abs(days)}日`, cls: "is-today" };
+        if (days === 0) return { text: "今日が締切", cls: "is-today" };
+        if (days === 1) return { text: "明日が締切", cls: "is-soon" };
         if (days <= 7) return { text: `あと${days}日`, cls: "is-soon" };
-        return { text: `締切：${formatDateLabel(date)}`, cls: "" };
+        return { text: `締切：${formatDateLabel(due)}`, cls: "" };
       }
 
       function renderTodayTasks() {
@@ -4079,10 +4156,10 @@
         const canShowTask = event => groupSetting(event).showInTasks !== false;
         const dueToday = state.events.filter(event => event.date === todayKey && isOpen(event) && canShowTask(event));
         const workToday = state.events.filter(event => event.workToday && event.date !== todayKey && isOpen(event) && canShowTask(event));
-        // リマインダー対象は完了済みを除外し、グループごとの表示設定を反映する。
+        // リマインダー対象はグループごとの表示設定や完了状態に関係なく表示する。
         const groupPriority = new Map(state.groups.map((groupName, index) => [groupName, index]));
         const reminders = state.events
-          .filter(event => (event.progress || "not-started") !== "done" && ensureReminderSetting(event.group || DEFAULT_GROUPS[0]).showInReminders !== false && isTodayTask(event, today))
+          .filter(event => isTodayTask(event, today))
           .sort((a, b) => {
             const aGroup = groupPriority.has(a.group || DEFAULT_GROUPS[0])
               ? groupPriority.get(a.group || DEFAULT_GROUPS[0]) : Number.MAX_SAFE_INTEGER;
@@ -4100,10 +4177,7 @@
           const heading = document.createElement("h3"); heading.className = "task-section-title"; heading.textContent = title; list.appendChild(heading);
           unique.forEach(event => {
             const item = mode === "reminder" ? createScheduleItem(event, false, true) : createScheduleItem(event, true, false);
-            item.classList.add("is-today-task");
-            const deadlineInfo = getDeadlineInfo(event);
-            if (deadlineInfo && deadlineInfo.urgent && mode !== "reminder") item.classList.add("is-deadline-urgent");
-            list.appendChild(item); count += 1;
+            item.classList.add("is-today-task"); list.appendChild(item); count += 1;
           });
         };
 
@@ -4240,7 +4314,6 @@
           const setProgress = value => {
             state.events = state.events.map(saved => saved.id === event.id ? {...saved, progress: value} : saved);
             saveJson(STORAGE_KEYS.events, state.events);
-            scheduleReminderTimers();
             renderTodayTasks(); renderCalendar(); renderSchedule(); renderSelectedDayTimeline();
           };
           const button = document.createElement("button");
@@ -4442,7 +4515,6 @@
             saveReminderSettings();
             renderReminderSettings();
             renderTodayTasks();
-            scheduleReminderTimers();
           });
           const taskDisplayButton = document.createElement("button");
           taskDisplayButton.type = "button";
@@ -4454,7 +4526,6 @@
             saveReminderSettings();
             renderReminderSettings();
             renderTodayTasks();
-            scheduleReminderTimers();
           });
           const displayCaption = document.createElement("small");
           displayCaption.className = "group-display-caption";
@@ -4466,27 +4537,49 @@
           enabledInput.checked = setting.enabled;
 
           minutesSelect.className = "reminder-select";
+
           minutesSelect.disabled = !setting.enabled;
-          minutesSelect.multiple = false;
-          minutesSelect.size = 1;
-          minutesSelect.setAttribute("aria-label", `${groupName}の通知タイミング`);
+
           minutesSelect.innerHTML = "";
 
           const dayGroup = document.createElement("optgroup");
+
           dayGroup.label = "日単位";
+
           const hourGroup = document.createElement("optgroup");
+
           hourGroup.label = "時間単位";
+
           const minuteGroup = document.createElement("optgroup");
+
           minuteGroup.label = "分単位";
+
           REMINDER_OPTIONS.forEach(optionData => {
+
             const option = document.createElement("option");
+
             option.value = optionData.value;
+
             option.textContent = optionData.label;
-            if (optionData.value >= 1440) dayGroup.appendChild(option);
-            else if (optionData.value >= 60) hourGroup.appendChild(option);
-            else minuteGroup.appendChild(option);
+
+            if (optionData.value >= 1440) {
+
+              dayGroup.appendChild(option);
+
+            } else if (optionData.value >= 60) {
+
+              hourGroup.appendChild(option);
+
+            } else {
+
+              minuteGroup.appendChild(option);
+
+            }
+
           });
+
           minutesSelect.append(dayGroup, hourGroup, minuteGroup);
+
           minutesSelect.value = String(setting.minutesBefore);
 
           enabledInput.addEventListener("change", () => {
@@ -4506,11 +4599,19 @@
           });
 
           minutesSelect.addEventListener("change", () => {
+
             setting.minutesBefore = normalizeReminderMinutes(minutesSelect.value);
+
+            minutesSelect.value = String(setting.minutesBefore);
+
             saveReminderSettings();
+
             renderCalendar();
+
             renderSchedule();
+
             scheduleReminderTimers();
+
           });
 
           if (!isFixed) {
@@ -5127,35 +5228,8 @@
           .filter(item => String(item.grade ?? "1") === activeSelection.grade && (String(item.term || "前期") === activeSelection.term || String(item.term || "") === "通年") && isClassActiveOnDate(item, date))
           .sort((a, b) => (timeToMinutes(a.startTime) ?? 9999) - (timeToMinutes(b.startTime) ?? 9999));
 
-        // 予定と授業をまとめ、時間が重なるものを別レーンに配置する。
-        const blocks = [
-          ...events.map(item => ({ kind: "event", item, start: timeToMinutes(item.time) ?? 0, end: timeToMinutes(getEventEndTime(item)) ?? ((timeToMinutes(item.time) ?? 0) + 60) })),
-          ...classes.map(item => ({ kind: "class", item, start: timeToMinutes(item.startTime) ?? 0, end: timeToMinutes(item.endTime) ?? ((timeToMinutes(item.startTime) ?? 0) + 60) }))
-        ].map(block => ({ ...block, end: block.end > block.start ? block.end : block.start + 60 }))
-         .sort((a, b) => a.start - b.start || a.end - b.end);
-        // 重なりの連結グループごとに必要なレーン数を算出する。
-        let cluster = [], clusterEnd = -1;
-        const clusters = [];
-        for (const block of blocks) {
-          if (cluster.length && block.start >= clusterEnd) { clusters.push(cluster); cluster = []; clusterEnd = -1; }
-          cluster.push(block); clusterEnd = Math.max(clusterEnd, block.end);
-        }
-        if (cluster.length) clusters.push(cluster);
-        for (const group of clusters) {
-          const laneEnds = [];
-          for (const block of group) {
-            let lane = laneEnds.findIndex(end => end <= block.start);
-            if (lane < 0) lane = laneEnds.length;
-            laneEnds[lane] = block.end;
-            block.lane = lane;
-          }
-          const laneCount = Math.max(1, laneEnds.length);
-          group.forEach(block => {
-            const layout = { lane: block.lane, laneCount };
-            if (block.kind === "event") renderTimelineEvent(track, block.item, layout);
-            else renderTimelineClass(track, block.item, layout);
-          });
-        }
+        events.forEach(event => renderTimelineEvent(track, event, false));
+        classes.forEach(item => renderTimelineClass(track, item));
 
         if (!events.length && !classes.length) {
           const empty = document.createElement("div");
@@ -5200,18 +5274,13 @@
         };
       }
 
-      function renderTimelineEvent(track, event, layout = { lane: 0, laneCount: 1 }) {
+      function renderTimelineEvent(track, event) {
         const position = getTimelinePosition(event.time, getEventEndTime(event));
         if (!position) return;
         const block = document.createElement("article");
         block.className = "timeline-event";
         block.style.top = `${position.top}px`;
         block.style.height = `${position.height}px`;
-        block.style.left = `calc(${(layout.lane / layout.laneCount) * 100}% + 6px)`;
-        block.style.right = `calc(${((layout.laneCount - layout.lane - 1) / layout.laneCount) * 100}% + 6px)`;
-        block.style.minWidth = "0";
-        block.style.padding = layout.laneCount > 1 ? "6px 6px 6px 12px" : "8px 12px 8px 16px";
-        block.style.zIndex = String(3 + layout.lane);
         block.style.backgroundColor = `${hexToRgba(getGroupColor(event.group), 0.28)}`;
         block.style.color = getGroupColor(event.group);
         block.title = `${event.title || "無題の予定"} ${event.time || ""}`;
@@ -5219,7 +5288,6 @@
         const title = document.createElement("div");
         title.className = "timeline-event-title";
         title.textContent = event.title || "無題の予定";
-        if (layout.laneCount > 1) { title.style.whiteSpace = "normal"; title.style.overflowWrap = "anywhere"; title.style.fontSize = "12px"; }
         const time = document.createElement("div");
         time.className = "timeline-event-time";
         time.textContent = event.time ? `🕒 ${event.time}${getEventEndTime(event) ? `–${getEventEndTime(event)}` : ""}` : "終日";
@@ -5231,7 +5299,7 @@
         track.appendChild(block);
       }
 
-      function renderTimelineClass(track, item, layout = { lane: 0, laneCount: 1 }) {
+      function renderTimelineClass(track, item) {
         const position = getTimelinePosition(item.startTime, item.endTime);
         if (!position) return;
         const block = document.createElement("article");
@@ -5242,11 +5310,6 @@
         block.className = `timeline-event timeline-class status-${override.status || "normal"}`;
         block.style.top = `${position.top}px`;
         block.style.height = `${position.height}px`;
-        block.style.left = `calc(${(layout.lane / layout.laneCount) * 100}% + 6px)`;
-        block.style.right = `calc(${((layout.laneCount - layout.lane - 1) / layout.laneCount) * 100}% + 6px)`;
-        block.style.minWidth = "0";
-        block.style.padding = layout.laneCount > 1 ? "6px 6px 6px 12px" : "8px 12px 8px 16px";
-        block.style.zIndex = String(3 + layout.lane);
         block.title = `${item.title} ${item.startTime || ""}–${item.endTime || ""}｜${statusLabels[override.status] || "通常"}（タップしてこの日だけ編集）`;
         block.tabIndex = 0;
         block.style.zIndex = "3";
@@ -5258,7 +5321,6 @@
         const title = document.createElement("div");
         title.className = "timeline-event-title";
         title.textContent = `${item.title}${override.status && override.status !== "normal" ? ` · ${statusLabels[override.status]}` : ""}`;
-        if (layout.laneCount > 1) { title.style.whiteSpace = "normal"; title.style.overflowWrap = "anywhere"; title.style.fontSize = "12px"; }
         const time = document.createElement("div");
         time.className = "timeline-event-time";
         time.textContent = `${item.startTime || ""}${item.endTime ? `–${item.endTime}` : ""} · ${item.periodCount || 1}コマ`;
@@ -5731,84 +5793,66 @@
 
         }
 
-        try {
-          await notificationApi.requestPermission();
-        } catch (error) {
-          console.warn("通知の許可を取得できませんでした", error);
-          alert("通知の許可を取得できませんでした。ブラウザのサイト設定で通知を許可してください。");
-        }
+        await notificationApi.requestPermission();
+
         renderNotificationStatus();
+
         scheduleReminderTimers();
 
       }
 
-      const REMINDER_SENT_STORAGE_KEY = "calendarReminderSentAt";
-
-      function loadReminderSentMap() {
-        try { return JSON.parse(localStorage.getItem(REMINDER_SENT_STORAGE_KEY) || "{}"); }
-        catch (_) { return {}; }
-      }
-
-      function markReminderSent(key) {
-        const sent = loadReminderSentMap();
-        sent[key] = Date.now();
-        // Keep the newest 500 records to prevent unbounded localStorage growth.
-        const entries = Object.entries(sent).sort((a, b) => b[1] - a[1]).slice(0, 500);
-        try { localStorage.setItem(REMINDER_SENT_STORAGE_KEY, JSON.stringify(Object.fromEntries(entries))); } catch (_) {}
-      }
-
       function scheduleReminderTimers() {
+
         state.notificationTimers.forEach(timerId => clearTimeout(timerId));
+
         state.notificationTimers = [];
+
         const notificationApi = getNotificationApi();
-        if (!notificationApi || notificationApi.permission !== "granted") { renderNotificationStatus(); return; }
+
+        if (!notificationApi || notificationApi.permission !== "granted") {
+
+          renderNotificationStatus();
+
+          return;
+
+        }
+
         const now = Date.now();
+
         const maxDelay = 2147483647;
-        const sentMap = loadReminderSentMap();
 
         state.events.forEach(event => {
-          if ((event.progress || "not-started") === "done") return;
+
           const setting = ensureReminderSetting(event.group || DEFAULT_GROUPS[0]);
-          if (!setting.enabled || setting.showInReminders === false) return;
+
           const eventDateTime = getEventDateTime(event);
-          if (!eventDateTime || eventDateTime.getTime() <= now) return;
-          const minutesBefore = normalizeReminderMinutes(setting.minutesBefore);
-          const reminderAt = eventDateTime.getTime() - minutesBefore * 60000;
-          // ID changes when the event date/time or reminder interval changes.
-          const sentKey = `${event.id}|${eventDateTime.getTime()}|${minutesBefore}`;
+
+          if (!setting.enabled || !eventDateTime) {
+
+            return;
+
+          }
+
+          const reminderAt = eventDateTime.getTime() - setting.minutesBefore * 60 * 1000;
+
           const delay = reminderAt - now;
 
-          if (delay <= 0) {
-            // The browser may have been closed/asleep when the reminder time passed.
-            // Notify once when the page opens or settings are refreshed, as long as the event is still upcoming.
-            if (!sentMap[sentKey]) {
-              showReminderNotification(event, { ...setting, minutesBefore });
-              markReminderSent(sentKey);
-            }
+          if (delay < 0 || delay > maxDelay) {
+
             return;
+
           }
-          if (delay > maxDelay) {
-            // setTimeout は約24.8日を超える待ち時間を正しく扱えないため、上限ごとに再計算する。
-            const timerId = setTimeout(() => scheduleReminderTimers(), maxDelay);
-            state.notificationTimers.push(timerId);
-            return;
-          }
+
           const timerId = setTimeout(() => {
-            const current = state.events.find(item => item.id === event.id);
-            if (!current || (current.progress || "not-started") === "done") return;
-            const currentSetting = ensureReminderSetting(current.group || DEFAULT_GROUPS[0]);
-            if (!currentSetting.enabled || currentSetting.showInReminders === false) return;
-            const currentDateTime = getEventDateTime(current);
-            if (!currentDateTime || currentDateTime.getTime() <= Date.now()) return;
-            const currentMinutes = normalizeReminderMinutes(currentSetting.minutesBefore);
-            if (currentMinutes !== minutesBefore || currentDateTime.getTime() !== eventDateTime.getTime()) return;
-            const currentKey = `${current.id}|${currentDateTime.getTime()}|${currentMinutes}`;
-            if (loadReminderSentMap()[currentKey]) return;
-            showReminderNotification(current, { ...currentSetting, minutesBefore: currentMinutes });
-            markReminderSent(currentKey);
+
+            showReminderNotification(event, setting);
+
           }, delay);
+
           state.notificationTimers.push(timerId);
+
         });
+
       }
 
       function getEventDateTime(event) {
@@ -5845,12 +5889,6 @@
 
       }
 
-      function formatReminderDuration(minutes) {
-        if (minutes % 1440 === 0) return `${minutes / 1440}日前`;
-        if (minutes % 60 === 0) return `${minutes / 60}時間前`;
-        return `${minutes}分前`;
-      }
-
       function showReminderNotification(event, setting) {
 
         const notificationApi = getNotificationApi();
@@ -5863,13 +5901,13 @@
 
         const timingText =
 
-          setting.minutesBefore === 0 ? "予定時刻です" : `${formatReminderDuration(setting.minutesBefore)}の予定です`;
+          setting.minutesBefore === 0 ? "予定時刻です" : `${setting.minutesBefore}分後の予定です`;
 
         new notificationApi("予定のリマインダー", {
 
           body: `${timingText}：${event.title} ${event.time || ""}`,
 
-          tag: `calendar-event-${event.id}-${setting.minutesBefore}`
+          tag: `calendar-event-${event.id}`
 
         });
 
