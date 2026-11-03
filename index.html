@@ -3227,21 +3227,21 @@
 
 </style><style>
 
-    /* スマホの月移動・年月・操作ボタンを左右対称に整える */
+    /* スマホでは「今日」と「祝日」ボタンを必ず同じ幅・高さにする */
     @media (max-width: 600px) {
       .calendar-month-bar {
         display: grid !important;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+        grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
         grid-template-areas:
-          "prev title next"
-          "today holiday" !important;
-        /* 1段目は矢印・年月・矢印の3列、2段目は同じ幅の2列 */
-        grid-template-columns: 40px minmax(0, 1fr) 40px !important;
-        column-gap: 8px !important;
+          "prev title title title title next"
+          "today today today holiday holiday holiday" !important;
+        column-gap: 7px !important;
         row-gap: 12px !important;
         justify-content: stretch !important;
         align-items: center !important;
-        padding: 8px 2px 14px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 8px 0 14px !important;
       }
       .calendar-month-bar #prev-month,
       .calendar-month-bar #next-month {
@@ -3275,35 +3275,72 @@
       }
       .calendar-month-bar .calendar-today-button,
       .calendar-month-bar .holiday-toggle-button {
-        grid-area: auto !important;
         width: 100% !important;
         min-width: 0 !important;
         max-width: none !important;
+        height: 46px !important;
         min-height: 46px !important;
+        max-height: 46px !important;
         box-sizing: border-box !important;
         justify-self: stretch !important;
+        align-self: stretch !important;
         margin: 0 !important;
-        padding: 9px 8px !important;
-        font-size: clamp(12px, 3.5vw, 14px) !important;
+        padding: 8px 4px !important;
+        font-size: clamp(11px, 3.4vw, 14px) !important;
         line-height: 1.2 !important;
         white-space: nowrap !important;
         overflow: hidden !important;
-        text-overflow: ellipsis !important;
+        text-overflow: clip !important;
       }
       .calendar-month-bar .calendar-today-button { grid-area: today !important; }
       .calendar-month-bar .holiday-toggle-button { grid-area: holiday !important; }
     }
     @media (max-width: 380px) {
       .calendar-month-bar {
-        grid-template-columns: 36px minmax(0, 1fr) 36px !important;
-        column-gap: 6px !important;
+        grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+        column-gap: 5px !important;
       }
       .calendar-month-bar #prev-month,
       .calendar-month-bar #next-month { width: 36px !important; min-width: 36px !important; height: 40px !important; }
       .calendar-month-bar .calendar-today-button,
-      .calendar-month-bar .holiday-toggle-button { font-size: 12px !important; padding-inline: 5px !important; }
+      .calendar-month-bar .holiday-toggle-button { height: 44px !important; min-height: 44px !important; max-height: 44px !important; font-size: 11px !important; padding-inline: 2px !important; }
     }
 
+
+
+    /* スマホでも予定追加ボタンはPCと同じ小型の右下固定。メニュー表示中は隠す。 */
+    #add-event-btn {
+      position: fixed !important;
+      right: max(16px, env(safe-area-inset-right) + 12px) !important;
+      left: auto !important;
+      bottom: max(16px, env(safe-area-inset-bottom) + 12px) !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: calc(100vw - 32px) !important;
+      min-height: 48px !important;
+      height: 48px !important;
+      padding: 0 18px !important;
+      font-size: 14px !important;
+      line-height: 1 !important;
+      white-space: nowrap !important;
+      border-radius: 999px !important;
+      z-index: 1100 !important;
+      box-sizing: border-box !important;
+    }
+    .app.is-menu-open #add-event-btn { display: none !important; }
+    @media (max-width: 640px) {
+      #add-event-btn {
+        right: max(12px, env(safe-area-inset-right) + 10px) !important;
+        left: auto !important;
+        bottom: max(12px, env(safe-area-inset-bottom) + 10px) !important;
+        width: auto !important;
+        max-width: calc(100vw - 24px) !important;
+        min-height: 46px !important;
+        height: 46px !important;
+        padding: 0 16px !important;
+        font-size: 13px !important;
+      }
+    }
 </style>
 </head>
 
@@ -6929,11 +6966,13 @@
       // ハンバーガーメニュー
       const closeMainMenu = () => {
         elements.mainMenu.classList.remove("is-menu-open");
+        elements.app.classList.remove("is-menu-open");
         elements.menuToggleButton.setAttribute("aria-expanded", "false");
         elements.menuToggleButton.setAttribute("aria-label", "メニューを開く");
       };
       elements.menuToggleButton.addEventListener("click", () => {
         const isOpen = elements.mainMenu.classList.toggle("is-menu-open");
+        elements.app.classList.toggle("is-menu-open", isOpen);
         elements.menuToggleButton.setAttribute("aria-expanded", String(isOpen));
         elements.menuToggleButton.setAttribute("aria-label", isOpen ? "メニューを閉じる" : "メニューを開く");
       });
