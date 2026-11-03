@@ -826,7 +826,7 @@
     @media (max-width: 640px) {
       .reminder-row .group-delete-button { width: 100%; justify-self: stretch; }
     }
-    /* 今日やること：情報を詰めすぎず、カードの高さと操作をコンパクトに */
+    /* タスク欄：情報を詰めすぎず、カードの高さと操作をコンパクトに */
     .today-task-section .schedule-list { gap:8px; }
     .today-task-section .schedule-item.is-today-task {
       padding:10px 12px;
@@ -899,6 +899,69 @@
       .today-task-section .schedule-item.is-today-task .task-state-button { min-height:32px; padding:5px 8px; }
     }
     .today-classes-title { border-top:1px solid var(--border); padding-top:14px; margin-top:18px !important; }
+    .today-class-card { border-left:4px solid #56c6f0; cursor:pointer; transition:border-color .15s, background .15s, transform .15s; }
+    .today-class-card:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+    .today-class-card.class-status-exam { border:2px solid #e45b65; border-left-width:6px; background:rgba(220,65,65,.13); }
+    .today-class-card.class-status-cancelled { border-left-color:#929aa6; opacity:.78; background:rgba(130,140,152,.10); }
+    .today-class-card.class-status-makeup { border-left-color:#45ae75; background:rgba(44,160,95,.13); }
+    .today-class-card.class-status-ondemand { border-left-color:#9b91d0; background:rgba(140,140,180,.12); }
+    .class-status-pill { max-width:none; padding:4px 10px; font-size:12px; }
+    .status-pill-exam, .exam-task-pill { background:#b8323d; color:#fff; }
+    .status-pill-cancelled { background:#66717f; color:#fff; }
+    .status-pill-makeup { background:#187447; color:#fff; }
+    .status-pill-ondemand { background:#655a9b; color:#fff; }
+    .class-status-hint { margin-top:6px; color:var(--muted); font-size:11px; }
+    .exam-task-card {
+      position:relative;
+      border:1px solid rgba(228,91,101,.72) !important;
+      border-left:7px solid #f04452 !important;
+      background:linear-gradient(110deg, rgba(190,38,52,.25), rgba(220,65,65,.10)) !important;
+      box-shadow:0 3px 14px rgba(190,38,52,.16);
+      padding:15px 16px !important;
+    }
+    .exam-task-card .schedule-title { color:#ffb5b9; font-weight:800; font-size:16px; }
+    .exam-task-card .schedule-time { color:var(--text); font-weight:650; margin-top:7px; }
+    .exam-task-heading {
+      display:flex;
+      align-items:center;
+      gap:9px;
+      margin:18px 0 10px !important;
+      padding:10px 13px !important;
+      border:1px solid rgba(228,91,101,.65);
+      border-left:6px solid #f04452;
+      border-radius:9px;
+      color:#ff9da4 !important;
+      background:rgba(190,38,52,.20);
+      font-size:17px !important;
+      font-weight:850 !important;
+      letter-spacing:.04em;
+    }
+    .exam-task-heading::before { content:"●"; color:#ff5966; font-size:13px; }
+    .exam-task-pill {
+      white-space:nowrap;
+      background:#c62838 !important;
+      color:#fff !important;
+      border:1px solid #ff8991;
+      border-radius:7px;
+      padding:6px 11px !important;
+      font-size:12px !important;
+      font-weight:800 !important;
+      box-shadow:0 2px 7px rgba(0,0,0,.18);
+    }
+    @media (max-width:640px) {
+      .today-task-section { padding:clamp(10px,3vw,16px); }
+      .today-task-heading { align-items:flex-start; }
+      .today-task-count { font-size:12px; }
+      .today-class-card, .exam-task-card { padding:12px !important; }
+      .today-class-card .schedule-top, .exam-task-card .schedule-top { align-items:flex-start; flex-wrap:wrap; }
+      .today-class-card .schedule-title, .exam-task-card .schedule-title { flex:1 1 150px; font-size:15px; }
+      .class-status-pill, .exam-task-pill { flex:0 0 auto; }
+    }
+    @media (max-width:380px) {
+      .today-task-heading h2 { font-size:16px; }
+      .today-class-card .schedule-title, .exam-task-card .schedule-title { flex-basis:100%; }
+      .class-status-pill, .exam-task-pill { white-space:normal; }
+    }
     .task-checkbox-label { display:flex; align-items:center; gap:8px; }
     .task-progress-field { max-width:260px; }
 
@@ -3029,6 +3092,139 @@
       .calendar-month-bar { grid-template-columns: 34px minmax(0, 1fr) minmax(84px, 1fr) !important; }
       .calendar-month-bar .holiday-toggle-button { min-width: 84px; font-size: 10px !important; }
     }
+
+    /* 期限・重要予定・複数日予定の視認性 */
+    .deadline-badge.is-urgent { color:#fff; background:#d97706; box-shadow:0 0 0 1px rgba(217,119,6,.2); }
+    .deadline-badge.is-today { color:#fff; background:#c62828; box-shadow:0 0 0 1px rgba(198,40,40,.22); }
+    .schedule-item.is-important-event { border:2px solid #e5a12b; background:linear-gradient(110deg, rgba(229,161,43,.13), var(--surface-2) 58%); }
+    .schedule-item.is-important-event .schedule-title::before { content:"★ "; color:#e5a12b; }
+    .event-chip.is-important-event-chip { outline:2px solid #e5a12b; outline-offset:-2px; font-weight:800; }
+    .timeline-event.is-important-event { border:2px solid #e5a12b; box-shadow:0 0 0 2px rgba(229,161,43,.16), 0 8px 18px rgba(0,0,0,.16); }
+    .important-event-row { padding:2px 0; }
+    .important-toggle-button { min-height:46px; width:100%; border:1px solid #c58b24; color:var(--text); font-weight:800; }
+    .important-toggle-button.is-active { background:rgba(229,161,43,.22); border:2px solid #e5a12b; color:var(--text); }
+    #json-export-panel { width:100%; min-width:0; }
+    #json-export-text { display:block; width:100%; min-width:0; max-width:100%; min-height:220px; white-space:pre; overflow:auto; tab-size:2; }
+    @media (max-width:640px) {
+      .event-form .form-grid { grid-template-columns:minmax(0,1fr) !important; }
+      .event-form .form-group { width:100%; }
+      .event-form .task-checkbox-row { padding:12px; }
+      .selected-day-head { flex-wrap:wrap; }
+      .timeline-event { left:6px; right:2px; padding:7px 8px 7px 13px; }
+      .timeline-event-title { font-size:14px; }
+      .share-modal { width:100%; }
+      #json-export-text { min-height:180px; font-size:11px !important; }
+    }
+    /* 予定追加ボタンはカレンダー（メイン）画面だけに表示 */
+    .app.is-settings-view #add-event-btn,
+    .app.is-timetable-view #add-event-btn,
+    .app.is-event-form-view #add-event-btn { display:none !important; }
+
+
+    /* 24時間以内のタスク：試験より控えめなオレンジ系で注意を促す */
+    .today-task-section .schedule-item.is-today-task.is-deadline-within-24h:not(.exam-task-card) {
+      background:#fff8e8 !important;
+      border:1.5px solid #e5a12b !important;
+      border-left:6px solid #d88912 !important;
+      border-radius:10px !important;
+      box-shadow:0 2px 8px rgba(180,115,15,.12) !important;
+    }
+    .today-task-section .schedule-item.is-deadline-within-24h .schedule-title {
+      color:#75420b !important;
+      font-weight:800 !important;
+    }
+    .today-task-section .schedule-item.is-deadline-within-24h .deadline-badge {
+      background:#d88912 !important;
+      color:#fff !important;
+      border:1px solid #a96308 !important;
+      border-radius:6px;
+      padding:4px 8px !important;
+      font-size:11px !important;
+      font-weight:850 !important;
+    }
+    .today-task-section .schedule-item.is-deadline-within-24h .schedule-time {
+      color:#62451f !important;
+      font-weight:650;
+    }
+    @media (max-width:640px) {
+      .today-task-section .schedule-item.is-deadline-within-24h { padding:11px !important; }
+    }
+
+    /* 試験タスク：ライト／ダーク両方で文字コントラストを確保 */
+    .today-task-section .exam-task-heading {
+      color:#7f1d1d !important;
+      background:#ffe4e6 !important;
+      border:2px solid #dc3545 !important;
+      border-left:8px solid #b91c1c !important;
+      border-radius:10px !important;
+      font-size:18px !important;
+      font-weight:900 !important;
+      padding:12px 15px !important;
+      box-shadow:0 2px 8px rgba(127,29,29,.10);
+    }
+    .today-task-section .exam-task-heading::before {
+      content:"!";
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:22px;
+      height:22px;
+      border-radius:50%;
+      background:#b91c1c;
+      color:#fff;
+      font-size:15px;
+      font-weight:900;
+    }
+    .today-task-section .schedule-item.exam-task-card {
+      background:#fff7f7 !important;
+      border:2px solid #dc3545 !important;
+      border-left:8px solid #b91c1c !important;
+      border-radius:12px !important;
+      box-shadow:0 3px 12px rgba(127,29,29,.12) !important;
+      padding:16px !important;
+    }
+    .today-task-section .schedule-item.exam-task-card .schedule-title {
+      color:#7f1d1d !important;
+      font-size:17px !important;
+      line-height:1.5 !important;
+      font-weight:900 !important;
+      overflow-wrap:anywhere;
+    }
+    .today-task-section .schedule-item.exam-task-card .schedule-time,
+    .today-task-section .schedule-item.exam-task-card .schedule-detail {
+      display:block !important;
+      color:#263449 !important;
+      font-size:14px !important;
+      line-height:1.6 !important;
+      font-weight:700 !important;
+      margin-top:8px !important;
+    }
+    .today-task-section .schedule-item.exam-task-card .exam-task-pill {
+      display:inline-flex !important;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 auto !important;
+      max-width:none !important;
+      overflow:visible !important;
+      text-overflow:clip !important;
+      white-space:nowrap !important;
+      background:#b91c1c !important;
+      color:#fff !important;
+      border:2px solid #991b1b !important;
+      border-radius:8px !important;
+      padding:7px 12px !important;
+      font-size:13px !important;
+      line-height:1.4 !important;
+      font-weight:900 !important;
+      box-shadow:none !important;
+    }
+    @media (max-width:640px) {
+      .today-task-section .schedule-item.exam-task-card { padding:13px !important; }
+      .today-task-section .schedule-item.exam-task-card .schedule-title { font-size:16px !important; }
+      .today-task-section .schedule-item.exam-task-card .schedule-time,
+      .today-task-section .schedule-item.exam-task-card .schedule-detail { font-size:13px !important; }
+    }
+
 </style></head>
 
 <body>
@@ -3065,9 +3261,9 @@
 
       <div>
 
-        <section class="today-task-section" aria-label="今日のタスク">
+        <section class="today-task-section" aria-label="タスク">
           <div class="today-task-heading">
-            <div><h2>今日やること</h2><p>授業・締切・今日取り組むタスクをまとめて確認</p></div>
+            <div><h2>タスク</h2><p>今日の予定・締切・取り組むタスクをまとめて確認</p></div>
             <span id="today-task-count" class="today-task-count">0件</span>
           </div>
           <div id="today-task-list" class="schedule-list"></div>
@@ -3291,11 +3487,12 @@
           <div class="form-grid">
 
             <div class="form-group">
-
-              <label for="event-date">日付</label>
-
+              <label for="event-date">開始日</label>
               <input id="event-date" type="date">
-
+            </div>
+            <div class="form-group">
+              <label for="event-end-date">終了日（連日予定の場合）</label>
+              <input id="event-end-date" type="date">
             </div>
 
             <div class="form-group">
@@ -3355,7 +3552,11 @@
             </div>
 
             <div class="form-group is-wide task-checkbox-row">
-              <label class="task-checkbox-label" for="event-work-today"><span>今日取り組むタスクにする</span><input id="event-work-today" type="checkbox"></label>
+              <label class="task-checkbox-label" for="event-work-today"><span>タスクに追加</span><input id="event-work-today" type="checkbox"></label>
+            </div>
+            <div class="form-group is-wide important-event-row">
+              <input id="event-important" type="checkbox" hidden>
+              <button class="secondary-button important-toggle-button" id="toggle-important-btn" type="button" aria-pressed="false">☆ 重要な予定にする</button>
             </div>
 
             <div class="form-group is-wide task-progress-field">
@@ -3584,6 +3785,7 @@
         eventFormTitle: document.getElementById("event-form-title"),
 
         eventDate: document.getElementById("event-date"),
+        eventEndDate: document.getElementById("event-end-date"),
 
         eventTime: document.getElementById("event-time"),
         eventEndTime: document.getElementById("event-end-time"),
@@ -3596,6 +3798,8 @@
         eventDetail: document.getElementById("event-detail"),
         eventWorkToday: document.getElementById("event-work-today"),
         eventProgress: document.getElementById("event-progress"),
+        eventImportant: document.getElementById("event-important"),
+        importantToggleButton: document.getElementById("toggle-important-btn"),
         todayTaskCount: document.getElementById("today-task-count"),
 
         addGroupButton: document.getElementById("add-group-btn"),
@@ -3685,7 +3889,8 @@
           
         }),
         classDayOverrides: loadJson(STORAGE_KEYS.classDayOverrides, {}),
-        editingClassForDateId: null
+        editingClassForDateId: null,
+        editingClassDateKey: null
 
       };
 
@@ -3815,7 +4020,7 @@
             throw new Error("スケジュール帳のJSONファイルではありません。");
           }
           const currentEvents = loadJson(STORAGE_KEYS.events, []);
-          const eventsMerge = mergeBySignature(currentEvents, data.events || [], ["date", "time", "endTime", "title", "group", "detail"], "event");
+          const eventsMerge = mergeBySignature(currentEvents, data.events || [], ["date", "endDate", "time", "endTime", "deadline", "title", "group", "detail", "important", "workToday"], "event");
           const currentTimetable = loadJson(STORAGE_KEYS.timetable, []);
           const timetableMerge = mergeBySignature(currentTimetable, data.timetable || [], ["dayOfWeek", "startPeriod", "period", "title", "grade", "term", "room", "teacher"], "class");
           const currentGroups = loadJson(STORAGE_KEYS.groups, DEFAULT_GROUPS);
@@ -3872,6 +4077,8 @@
             id: event.id || `${event.date}-${Date.now()}-${index}`,
 
             date: event.date,
+            endDate: event.endDate || event.date,
+            important: Boolean(event.important),
 
             time: event.time || "",
             endTime: event.endTime || "",
@@ -4369,10 +4576,11 @@
           chip.type = "button";
 
           chip.className = "event-chip";
+          if (event.important) chip.classList.add("is-important-event-chip");
 
           chip.style.backgroundColor = getGroupColor(event.group);
 
-          chip.textContent = event.time ? `${event.time} ${event.title}` : event.title;
+          chip.textContent = `${event.important ? "★ " : ""}${event.time ? `${event.time} ` : ""}${event.title}`;
 
           chip.setAttribute("aria-label", `${event.title}を編集`);
 
@@ -4448,15 +4656,9 @@
 
         const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-        const eventDayStart = new Date(
-
-          eventDate.getFullYear(),
-
-          eventDate.getMonth(),
-
-          eventDate.getDate()
-
-        );
+        const eventEndDate = parseDateKey(event.endDate || event.date);
+        const eventDayStart = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate());
+        const eventDayEnd = eventEndDate ? new Date(eventEndDate.getFullYear(), eventEndDate.getMonth(), eventEndDate.getDate()) : eventDayStart;
 
         // リマインダーがOFFなら、予定当日だけタスク欄に表示する。
 
@@ -4464,21 +4666,22 @@
 
         if (!setting.enabled) {
 
-          if (eventDayStart.getTime() !== todayStart.getTime()) {
-
+          if (todayStart.getTime() < eventDayStart.getTime() || todayStart.getTime() > eventDayEnd.getTime()) {
             return false;
-
           }
 
           // 時間指定がある予定は、予定時刻を過ぎたらタスク欄から消す。
 
           const eventDateTime = getEventDateTime(event);
 
+          // 連日予定は開始日の開始時刻を過ぎても、終了日まではタスク欄に残す。
+          if (todayStart.getTime() > eventDayStart.getTime()) return true;
           return !eventDateTime || eventDateTime >= now;
 
         }
 
         const eventDateTime = getEventDateTime(event);
+        if (todayStart.getTime() >= eventDayStart.getTime() && todayStart.getTime() <= eventDayEnd.getTime()) return true;
 
         if (!eventDateTime) {
 
@@ -4623,7 +4826,7 @@
         const todayKey = formatDateKey(now);
         return state.events.filter(event => {
           if ((event.progress || "not-started") === "done") return false;
-          return event.date === todayKey || Boolean(event.workToday) || isTodayTask(event, now);
+          return (event.date <= todayKey && (event.endDate || event.date) >= todayKey) || Boolean(event.workToday) || isTodayTask(event, now);
         }).sort((a, b) => {
           const aDue = a.date === todayKey ? 0 : 1;
           const bDue = b.date === todayKey ? 0 : 1;
@@ -4639,7 +4842,8 @@
             const hours = Math.ceil(diff / 3600000);
             if (diff < 0) return { text: "締切超過", cls: "is-today" };
             if (hours <= 24) return { text: `締切まであと${hours}時間`, cls: "is-today" };
-            if (hours <= 48) return { text: "締切は明日", cls: "is-soon" };
+            if (hours <= 72) return { text: `締切まであと${Math.ceil(hours / 24)}日`, cls: "is-urgent" };
+            if (hours <= 168) return { text: `締切まであと${Math.ceil(hours / 24)}日`, cls: "is-soon" };
             return { text: `締切：${dueAt.toLocaleString("ja-JP", {month:"numeric", day:"numeric", hour:"2-digit", minute:"2-digit"})}`, cls: "" };
           }
         }
@@ -4652,7 +4856,8 @@
         const days = Math.round((dueStart - todayStart) / 86400000);
         if (days < 0) return { text: `期限超過 ${Math.abs(days)}日`, cls: "is-today" };
         if (days === 0) return { text: "今日が締切", cls: "is-today" };
-        if (days === 1) return { text: "明日が締切", cls: "is-soon" };
+        if (days === 1) return { text: "明日が締切", cls: "is-today" };
+        if (days <= 3) return { text: `あと${days}日`, cls: "is-urgent" };
         if (days <= 7) return { text: `あと${days}日`, cls: "is-soon" };
         return { text: `締切：${formatDateLabel(due)}`, cls: "" };
       }
@@ -4665,8 +4870,8 @@
         const isOpen = event => (event.progress || "not-started") !== "done";
         const groupSetting = event => ensureReminderSetting(event.group || DEFAULT_GROUPS[0]);
         const canShowTask = event => groupSetting(event).showInTasks !== false;
-        const dueToday = state.events.filter(event => event.date === todayKey && isOpen(event) && canShowTask(event));
-        const workToday = state.events.filter(event => event.workToday && event.date !== todayKey && isOpen(event) && canShowTask(event));
+        const dueToday = state.events.filter(event => event.date <= todayKey && (event.endDate || event.date) >= todayKey && isOpen(event) && canShowTask(event));
+        const workToday = state.events.filter(event => event.workToday && !(event.date <= todayKey && (event.endDate || event.date) >= todayKey) && isOpen(event) && canShowTask(event));
         // リマインダー対象はグループごとの表示設定や完了状態に関係なく表示する。
         const groupPriority = new Map(state.groups.map((groupName, index) => [groupName, index]));
         const reminders = state.events
@@ -4703,15 +4908,56 @@
           String(item.grade ?? "1") === todaySelection.grade &&
           (String(item.term || "前期") === todaySelection.term || String(item.term || "") === "通年")
         );
+        const statusLabels = { normal: "通常", exam: "試験", cancelled: "休講", makeup: "補講", ondemand: "オンデマンド" };
         if (classes.length) {
           const heading = document.createElement("h3"); heading.className = "task-section-title today-classes-title"; heading.textContent = "今日の授業"; list.appendChild(heading);
           classes.sort((a,b) => Number(a.startPeriod || a.period || 0) - Number(b.startPeriod || b.period || 0)).forEach(cls => {
-            const card = document.createElement("article"); card.className = "schedule-item is-today-task";
+            const overrideKey = `${todayKey}::${cls.id}`;
+            const override = state.classDayOverrides[overrideKey] || { status: "normal", note: "" };
+            const status = override.status || "normal";
+            const card = document.createElement("article");
+            card.className = `schedule-item is-today-task today-class-card class-status-${status}`;
+            card.tabIndex = 0; card.setAttribute("role", "button");
+            card.setAttribute("aria-label", `${cls.title || cls.name || "授業"}。状態：${statusLabels[status] || "通常"}。タップして状態を変更`);
             const top = document.createElement("div"); top.className = "schedule-top";
             const title = document.createElement("div"); title.className = "schedule-title"; title.textContent = cls.title || cls.name || "授業";
-            const group = document.createElement("span"); group.className = "schedule-group"; group.textContent = "授業";
+            const group = document.createElement("span"); group.className = `schedule-group class-status-pill status-pill-${status}`; group.textContent = statusLabels[status] || "通常";
             top.append(title, group); card.append(top);
             const info = document.createElement("div"); info.className = "schedule-time"; info.textContent = `${cls.startTime || ""}${cls.endTime ? `～${cls.endTime}` : ""}${cls.room ? `・${cls.room}` : ""}`; card.append(info);
+            if (override.note) { const note = document.createElement("div"); note.className = "schedule-detail"; note.textContent = `メモ：${override.note}`; card.append(note); }
+            const hint = document.createElement("div"); hint.className = "class-status-hint"; hint.textContent = "タップして状態を変更"; card.append(hint);
+            const openTodayStatus = () => editClassForDate(cls, todayKey);
+            card.addEventListener("click", openTodayStatus);
+            card.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openTodayStatus(); } });
+            list.appendChild(card); count += 1;
+          });
+        }
+
+        // 日別状態が「試験」の授業は、試験日の7日前から当日までタスク欄に表示する。
+        const examItems = Object.entries(state.classDayOverrides || {}).flatMap(([key, override]) => {
+          if (!override || override.status !== "exam") return [];
+          const splitAt = key.indexOf("::");
+          if (splitAt < 0) return [];
+          const examDateKey = key.slice(0, splitAt);
+          const classId = key.slice(splitAt + 2);
+          const examDate = new Date(`${examDateKey}T00:00:00`);
+          if (Number.isNaN(examDate.getTime())) return [];
+          const daysLeft = Math.round((examDate - stripTime(today)) / 86400000);
+          if (daysLeft < 0 || daysLeft > 7) return [];
+          const cls = state.timetable.find(item => String(item.id) === String(classId));
+          if (!cls) return [];
+          return [{ cls, examDateKey, daysLeft, note: override.note || "" }];
+        }).sort((a, b) => a.examDateKey.localeCompare(b.examDateKey) || Number(a.cls.startPeriod || a.cls.period || 0) - Number(b.cls.startPeriod || b.cls.period || 0));
+        if (examItems.length) {
+          const heading = document.createElement("h3"); heading.className = "task-section-title exam-task-heading"; heading.textContent = "試験"; list.appendChild(heading);
+          examItems.forEach(({ cls, examDateKey, daysLeft, note }) => {
+            const card = document.createElement("article"); card.className = "schedule-item is-today-task exam-task-card";
+            const top = document.createElement("div"); top.className = "schedule-top";
+            const title = document.createElement("div"); title.className = "schedule-title"; title.textContent = cls.title || cls.name || "試験";
+            const badge = document.createElement("span"); badge.className = "schedule-group exam-task-pill"; badge.textContent = daysLeft === 0 ? "本日試験" : `試験まで${daysLeft}日`;
+            top.append(title, badge); card.append(top);
+            const info = document.createElement("div"); info.className = "schedule-time"; info.textContent = `試験日：${examDateKey.replaceAll("-", "/")}${cls.room ? `・${cls.room}` : ""}`; card.append(info);
+            if (note) { const detail = document.createElement("div"); detail.className = "schedule-detail"; detail.textContent = `メモ：${note}`; card.append(detail); }
             list.appendChild(card); count += 1;
           });
         }
@@ -4744,6 +4990,7 @@
         const deleteButton = document.createElement("button");
 
         item.className = "schedule-item";
+        if (event.important) item.classList.add("is-important-event");
 
         item.tabIndex = 0;
 
@@ -4785,10 +5032,9 @@
 
           const eventDate = parseDateKey(event.date);
 
+          const eventEndDate = parseDateKey(event.endDate || event.date);
           date.textContent = eventDate
-
-            ? `予定日：${formatDateLabel(eventDate)}`
-
+            ? `予定日：${formatDateLabel(eventDate)}${eventEndDate && event.endDate && event.endDate !== event.date ? `～${formatDateLabel(eventEndDate)}` : ""}`
             : "予定日：未設定";
 
           time.textContent = event.time
@@ -4801,9 +5047,9 @@
 
           date.textContent = "";
 
-          time.textContent = event.time
-            ? `時間：${event.time}${event.endTime ? `～${event.endTime}` : ""}`
-            : "時間：終日";
+          time.textContent = event.deadline
+            ? `締切：${new Date(event.deadline).toLocaleString("ja-JP", {month:"numeric", day:"numeric", hour:"2-digit", minute:"2-digit"})}`
+            : (event.time ? `時間：${event.time}${event.endTime ? `～${event.endTime}` : ""}` : "時間：終日");
 
         }
 
@@ -4811,6 +5057,26 @@
 
         detail.textContent = event.detail || "";
         const deadlineInfo = getDeadlineInfo(event);
+        // タスクの締切が24時間以内（または超過）なら、試験より控えめな緊急表示にする。
+        let isDeadlineWithin24Hours = false;
+        if (isTaskItem) {
+          if (event.deadline) {
+            const dueAt = new Date(event.deadline);
+            if (!Number.isNaN(dueAt.getTime())) {
+              const remainingMs = dueAt.getTime() - Date.now();
+              isDeadlineWithin24Hours = remainingMs <= 24 * 60 * 60 * 1000;
+            }
+          } else if (event.date) {
+            const dueDate = parseDateKey(event.date);
+            if (dueDate && !Number.isNaN(dueDate.getTime())) {
+              const todayStart = new Date();
+              todayStart.setHours(0, 0, 0, 0);
+              const dueStart = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+              isDeadlineWithin24Hours = dueStart.getTime() <= todayStart.getTime();
+            }
+          }
+        }
+        if (isDeadlineWithin24Hours) item.classList.add("is-deadline-within-24h");
         const taskMeta = document.createElement("div"); taskMeta.className = "task-meta-row";
         if (deadlineInfo && (event.deadline || (event.group || "").includes("課題") || isTaskItem || event.workToday)) {
           const badge = document.createElement("span"); badge.className = `deadline-badge ${deadlineInfo.cls}`.trim(); badge.textContent = deadlineInfo.text; taskMeta.appendChild(badge);
@@ -5040,7 +5306,7 @@
           });
           const displayCaption = document.createElement("small");
           displayCaption.className = "group-display-caption";
-          displayCaption.textContent = "今日やること画面に、このグループの予定を表示するか選べます。";
+          displayCaption.textContent = "タスク欄に、このグループの予定を表示するか選べます。";
           displayControls.append(reminderDisplayButton, taskDisplayButton, displayCaption);
 
           enabledInput.type = "checkbox";
@@ -5230,7 +5496,7 @@
 
         return state.events
 
-          .filter(event => event.date === dateKey)
+          .filter(event => event.date <= dateKey && (event.endDate || event.date) >= dateKey)
 
           .sort((first, second) => {
 
@@ -5305,6 +5571,13 @@
         requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
       }
 
+      function updateImportantToggleButton() {
+        const active = Boolean(elements.eventImportant.checked);
+        elements.importantToggleButton.classList.toggle("is-active", active);
+        elements.importantToggleButton.setAttribute("aria-pressed", String(active));
+        elements.importantToggleButton.textContent = active ? "★ 重要な予定に設定中" : "☆ 重要な予定にする";
+      }
+
       function openEventForm() {
 
         showEventFormPage();
@@ -5326,15 +5599,19 @@
 
         elements.eventDate.value = formatDateKey(state.selectedDate);
         elements.eventDate.dataset.previousDate = elements.eventDate.value;
+        elements.eventEndDate.value = elements.eventDate.value;
+        elements.eventEndDate.min = elements.eventDate.value;
 
         elements.eventTime.value = "";
         elements.eventEndTime.value = "";
-        elements.eventDeadline.value = `${elements.eventDate.value}T23:59`;
+        elements.eventDeadline.value = "";
 
         elements.eventTitle.value = "";
 
         elements.eventDetail.value = "";
         elements.eventWorkToday.checked = false;
+        elements.eventImportant.checked = false;
+        updateImportantToggleButton();
         elements.eventProgress.value = "in-progress";
 
         elements.newGroupArea.classList.remove("is-active");
@@ -5391,15 +5668,19 @@
 
         elements.eventDate.value = targetEvent.date;
         elements.eventDate.dataset.previousDate = targetEvent.date;
+        elements.eventEndDate.value = targetEvent.endDate || targetEvent.date;
+        elements.eventEndDate.min = targetEvent.date;
 
         elements.eventTime.value = targetEvent.time || "";
         elements.eventEndTime.value = targetEvent.endTime || "";
-        elements.eventDeadline.value = targetEvent.deadline || `${targetEvent.date}T23:59`;
+        elements.eventDeadline.value = targetEvent.deadline || "";
 
         elements.eventTitle.value = targetEvent.title || "";
 
         elements.eventDetail.value = targetEvent.detail || "";
         elements.eventWorkToday.checked = Boolean(targetEvent.workToday);
+        elements.eventImportant.checked = Boolean(targetEvent.important);
+        updateImportantToggleButton();
         elements.eventProgress.value = targetEvent.progress === "done" ? "done" : "in-progress";
 
         renderGroups();
@@ -5469,6 +5750,16 @@
 
         const normalizedStart = normalizeTimeEntry(elements.eventTime.value);
         const normalizedEnd = normalizeTimeEntry(elements.eventEndTime.value);
+        const endDate = elements.eventEndDate.value || date;
+        if (endDate < date) {
+          alert("終了日は開始日以降の日付を選択してください。");
+          elements.eventEndDate.focus();
+          return;
+        }
+        if (elements.eventDeadline.value && elements.eventEndTime.value) {
+          alert("終了時間と締切日時は同時に設定できません。どちらか一方にしてください。");
+          return;
+        }
         if (elements.eventTime.value && !normalizedStart) {
           alert("開始時間は4桁で入力してください（例：1230）。");
           elements.eventTime.focus();
@@ -5482,6 +5773,8 @@
         const eventData = {
 
           date,
+          endDate,
+          important: elements.eventImportant.checked,
 
           time: normalizedStart,
           endTime: normalizedEnd,
@@ -5857,6 +6150,7 @@
       function renderAllDayTimelineEvent(lane, event) {
         const block = document.createElement("div");
         block.className = "timeline-all-day-event";
+        if (event.important) block.classList.add("is-important-event");
         block.style.backgroundColor = hexToRgba(getGroupColor(event.group), 0.22);
         block.style.color = getGroupColor(event.group);
         block.style.flex = "1 1 180px";
@@ -5875,6 +6169,7 @@
         if (!position) return;
         const block = document.createElement("article");
         block.className = "timeline-event";
+        if (event.important) block.classList.add("is-important-event");
         block.style.top = `${position.top}px`;
         block.style.height = `${position.height}px`;
         block.style.backgroundColor = `${hexToRgba(getGroupColor(event.group), 0.28)}`;
@@ -5883,7 +6178,7 @@
 
         const title = document.createElement("div");
         title.className = "timeline-event-title";
-        title.textContent = event.title || "無題の予定";
+        title.textContent = `${event.important ? "★ " : ""}${event.title || "無題の予定"}`;
         const time = document.createElement("div");
         time.className = "timeline-event-time";
         time.textContent = event.time ? `🕒 ${event.time}${getEventEndTime(event) ? `–${getEventEndTime(event)}` : ""}` : "終日";
@@ -5944,11 +6239,15 @@
       }
 
       function editClassForSelectedDate(item) {
-        const dateKey = formatDateKey(state.selectedDate);
+        editClassForDate(item, formatDateKey(state.selectedDate));
+      }
+
+      function editClassForDate(item, dateKey) {
         const key = `${dateKey}::${item.id}`;
         const existing = state.classDayOverrides[key] || { status: "normal", note: "" };
         state.editingClassForDateId = item.id;
-        elements.classStatusDateLabel.textContent = `${formatDateLabel(state.selectedDate)}：${item.title}`;
+        state.editingClassDateKey = dateKey;
+        elements.classStatusDateLabel.textContent = `${formatDateLabel(new Date(`${dateKey}T00:00:00`))}：${item.title}`;
         elements.classStatusSelect.value = existing.status || "normal";
         elements.classStatusNote.value = existing.note || "";
         elements.classStatusOverlay.classList.add("is-active");
@@ -5959,11 +6258,12 @@
         elements.classStatusOverlay.classList.remove("is-active");
         elements.classStatusOverlay.setAttribute("aria-hidden", "true");
         state.editingClassForDateId = null;
+        state.editingClassDateKey = null;
       }
 
       function saveClassStatusForSelectedDate() {
         if (!state.editingClassForDateId) return;
-        const dateKey = formatDateKey(state.selectedDate);
+        const dateKey = state.editingClassDateKey || formatDateKey(state.selectedDate);
         const key = `${dateKey}::${state.editingClassForDateId}`;
         const status = elements.classStatusSelect.value;
         const note = elements.classStatusNote.value.trim();
@@ -5976,6 +6276,7 @@
         closeClassStatusEditor();
         renderSelectedDayTimeline();
         renderTimetableList();
+        renderTodayTasks();
       }
 
       function hexToRgba(hex, alpha) {
@@ -6513,12 +6814,13 @@
       elements.classStatusCancelButton.addEventListener("click", closeClassStatusEditor);
       elements.classStatusResetButton.addEventListener("click", () => {
         if (!state.editingClassForDateId) return;
-        const key = `${formatDateKey(state.selectedDate)}::${state.editingClassForDateId}`;
+        const key = `${state.editingClassDateKey || formatDateKey(state.selectedDate)}::${state.editingClassForDateId}`;
         delete state.classDayOverrides[key];
         saveJson(STORAGE_KEYS.classDayOverrides, state.classDayOverrides);
         closeClassStatusEditor();
         renderSelectedDayTimeline();
         renderTimetableList();
+        renderTodayTasks();
       });
       elements.classStatusOverlay.addEventListener("click", event => {
         if (event.target === elements.classStatusOverlay) closeClassStatusEditor();
@@ -6651,18 +6953,31 @@
       attachTimeEntryFormatting(elements.eventTime);
       attachTimeEntryFormatting(elements.eventEndTime);
 
-      // 予定の日付を変更したとき、締切日が元の予定日と同じなら一緒に更新する。
-      // 締切日をユーザーが別の日に変更している場合は、その設定を保持する。
       elements.eventDate.addEventListener("change", () => {
-        const previousDate = elements.eventDate.dataset.previousDate || "";
         const nextDate = elements.eventDate.value;
-        const deadline = elements.eventDeadline.value;
-        const deadlineDate = deadline ? deadline.slice(0, 10) : "";
-        if (nextDate && (!deadline || deadlineDate === previousDate)) {
-          const deadlineTime = deadline ? deadline.slice(11, 16) : "23:59";
-          elements.eventDeadline.value = `${nextDate}T${deadlineTime || "23:59"}`;
+        if (nextDate && (!elements.eventEndDate.value || elements.eventEndDate.value < nextDate)) {
+          elements.eventEndDate.value = nextDate;
         }
+        elements.eventEndDate.min = nextDate;
         elements.eventDate.dataset.previousDate = nextDate;
+      });
+      elements.importantToggleButton.addEventListener("click", () => {
+        elements.eventImportant.checked = !elements.eventImportant.checked;
+        updateImportantToggleButton();
+      });
+      elements.eventEndDate.addEventListener("change", () => {
+        if (elements.eventEndDate.value && elements.eventEndDate.value < elements.eventDate.value) {
+          elements.eventEndDate.value = elements.eventDate.value;
+        }
+      });
+      // 終了時間と締切日時は排他的にする。入力中ももう一方を解除する。
+      elements.eventEndTime.addEventListener("input", () => {
+        if (elements.eventEndTime.value) elements.eventDeadline.value = "";
+      });
+      elements.eventDeadline.addEventListener("input", () => {
+        if (elements.eventDeadline.value) {
+          elements.eventEndTime.value = "";
+        }
       });
 
 
