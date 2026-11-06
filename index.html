@@ -1275,6 +1275,25 @@
 
     }
 
+    .group-settings-save-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface-2);
+    }
+
+    .group-settings-save-row .primary-button { min-width: 170px; }
+
+    @media (max-width: 600px) {
+      .group-settings-save-row { align-items: stretch; flex-direction: column; }
+      .group-settings-save-row .primary-button { width: 100%; }
+    }
+
     .reminder-row {
 
       display: grid;
@@ -3416,6 +3435,11 @@
 
           <div class="reminder-settings-list" id="reminder-settings-list"></div>
 
+          <div class="group-settings-save-row">
+            <button class="primary-button" id="save-group-settings-btn" type="button">グループ設定を保存</button>
+            <span class="notification-status" id="group-settings-save-status" aria-live="polite">変更した内容は保存ボタンで反映されます。</span>
+          </div>
+
         </section>
 
         <section class="timetable-panel" id="timetable-panel" aria-label="大学時間割設定">
@@ -3892,6 +3916,8 @@
         notificationStatus: document.getElementById("notification-status"),
 
         reminderSettingsList: document.getElementById("reminder-settings-list"),
+        saveGroupSettingsButton: document.getElementById("save-group-settings-btn"),
+        groupSettingsSaveStatus: document.getElementById("group-settings-save-status"),
 
         addEventButton: document.getElementById("add-event-btn"),
 
@@ -3998,6 +4024,7 @@
         groups: savedGroups,
 
         reminderSettings: loadReminderSettings(savedGroups),
+        groupSettingsDirty: false,
 
         notificationTimers: [],
         timetable: loadTimetable(),
@@ -4387,8 +4414,34 @@
 
       function saveReminderSettings() {
 
-        saveJson(STORAGE_KEYS.reminders, state.reminderSettings);
+        return saveJson(STORAGE_KEYS.reminders, state.reminderSettings);
 
+      }
+
+      function markGroupSettingsDirty() {
+        state.groupSettingsDirty = true;
+        if (elements.groupSettingsSaveStatus) {
+          elements.groupSettingsSaveStatus.textContent = "未保存の変更があります。保存ボタンを押してください。";
+        }
+      }
+
+      function saveGroupSettings() {
+        const saved = saveReminderSettings();
+        if (!saved) {
+          if (elements.groupSettingsSaveStatus) {
+            elements.groupSettingsSaveStatus.textContent = "保存できませんでした。ブラウザの保存設定や空き容量を確認してください。";
+          }
+          return;
+        }
+        state.groupSettingsDirty = false;
+        renderTodayTasks();
+        renderCalendar();
+        renderSchedule();
+        scheduleReminderTimers();
+        if (elements.groupSettingsSaveStatus) {
+          elements.groupSettingsSaveStatus.textContent = "グループ設定を保存し、タスク・リマインダー表示に反映しました。";
+        }
+        renderReminderSettings();
       }
 
       function ensureReminderSetting(groupName) {
@@ -4992,7 +5045,7 @@
         // リマインダー対象はグループごとの表示設定や完了状態に関係なく表示する。
         const groupPriority = new Map(state.groups.map((groupName, index) => [groupName, index]));
         const reminders = state.events
-          .filter(event => isTodayTask(event, today))
+          .filter(event => groupSetting(event).showInReminders !== false && isTodayTask(event, today))
           .sort((a, b) => {
             const aGroup = groupPriority.has(a.group || DEFAULT_GROUPS[0])
               ? groupPriority.get(a.group || DEFAULT_GROUPS[0]) : Number.MAX_SAFE_INTEGER;
@@ -5405,9 +5458,8 @@
           reminderDisplayButton.setAttribute("aria-pressed", String(setting.showInReminders !== false));
           reminderDisplayButton.addEventListener("click", () => {
             setting.showInReminders = !(setting.showInReminders !== false);
-            saveReminderSettings();
+            markGroupSettingsDirty();
             renderReminderSettings();
-            renderTodayTasks();
           });
           const taskDisplayButton = document.createElement("button");
           taskDisplayButton.type = "button";
@@ -5416,9 +5468,8 @@
           taskDisplayButton.setAttribute("aria-pressed", String(setting.showInTasks !== false));
           taskDisplayButton.addEventListener("click", () => {
             setting.showInTasks = !(setting.showInTasks !== false);
-            saveReminderSettings();
+            markGroupSettingsDirty();
             renderReminderSettings();
-            renderTodayTasks();
           });
           const displayCaption = document.createElement("small");
           displayCaption.className = "group-display-caption";
@@ -5481,13 +5532,7 @@
 
             minutesSelect.disabled = !setting.enabled;
 
-            saveReminderSettings();
-
-            renderCalendar();
-
-            renderSchedule();
-
-            scheduleReminderTimers();
+            markGroupSettingsDirty();
 
           });
 
@@ -5497,13 +5542,7 @@
 
             minutesSelect.value = String(setting.minutesBefore);
 
-            saveReminderSettings();
-
-            renderCalendar();
-
-            renderSchedule();
-
-            scheduleReminderTimers();
+            markGroupSettingsDirty();
 
           });
 
@@ -7010,6 +7049,7 @@
       elements.closeSettingsButton.addEventListener("click", showCalendarPage);
 
       elements.requestNotificationButton.addEventListener("click", requestNotificationPermission);
+      elements.saveGroupSettingsButton.addEventListener("click", saveGroupSettings);
 
       elements.addEventButton.addEventListener("click", openEventForm);
 
