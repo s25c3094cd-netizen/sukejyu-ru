@@ -5016,7 +5016,7 @@
 
         // タスクとリマインダー対象は独立して表示する。
         addSection("タスク", [...dueToday, ...workToday], "task");
-        addSection("リマインダー予定", reminders, "reminder");
+        addSection("リマインダー", reminders, "reminder");
 
         // 授業はカレンダー画面の最下部に表示。設定・時間割画面ではCSSで非表示。
         const todaySelection = getCommittedGradeTerm();
@@ -5035,14 +5035,13 @@
             const card = document.createElement("article");
             card.className = `schedule-item is-today-task today-class-card class-status-${status}`;
             card.tabIndex = 0; card.setAttribute("role", "button");
-            card.setAttribute("aria-label", `${cls.title || cls.name || "授業"}。状態：${statusLabels[status] || "通常"}。タップして状態を変更`);
+            card.setAttribute("aria-label", `${cls.title || cls.name || "授業"}。状態：${statusLabels[status] || "通常"}`);
             const top = document.createElement("div"); top.className = "schedule-top";
             const title = document.createElement("div"); title.className = "schedule-title"; title.textContent = cls.title || cls.name || "授業";
             const group = document.createElement("span"); group.className = `schedule-group class-status-pill status-pill-${status}`; group.textContent = statusLabels[status] || "通常";
             top.append(title, group); card.append(top);
             const info = document.createElement("div"); info.className = "schedule-time"; info.textContent = `${cls.startTime || ""}${cls.endTime ? `～${cls.endTime}` : ""}${cls.room ? `・${cls.room}` : ""}`; card.append(info);
             if (override.note) { const note = document.createElement("div"); note.className = "schedule-detail"; note.textContent = `メモ：${override.note}`; card.append(note); }
-            const hint = document.createElement("div"); hint.className = "class-status-hint"; hint.textContent = "タップして状態を変更"; card.append(hint);
             const openTodayStatus = () => editClassForDate(cls, todayKey);
             card.addEventListener("click", openTodayStatus);
             card.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openTodayStatus(); } });
@@ -5079,7 +5078,7 @@
           });
         }
         elements.todayTaskCount.textContent = `${count}件`;
-        if (!count) { const empty = document.createElement("div"); empty.className = "empty-state"; empty.textContent = "今日のタスク・リマインダー予定・授業はありません。"; list.appendChild(empty); }
+        if (!count) { const empty = document.createElement("div"); empty.className = "empty-state"; empty.textContent = "今日のタスク・リマインダー・授業はありません。"; list.appendChild(empty); }
       }
 
       function createScheduleItem(event, isTaskItem = false, isReminderItem = false) {
@@ -5402,7 +5401,7 @@
           const reminderDisplayButton = document.createElement("button");
           reminderDisplayButton.type = "button";
           reminderDisplayButton.className = "group-display-toggle" + (setting.showInReminders !== false ? " is-enabled" : "");
-          reminderDisplayButton.textContent = `リマインダー予定：${setting.showInReminders !== false ? "表示" : "非表示"}`;
+          reminderDisplayButton.textContent = `リマインダー：${setting.showInReminders !== false ? "表示" : "非表示"}`;
           reminderDisplayButton.setAttribute("aria-pressed", String(setting.showInReminders !== false));
           reminderDisplayButton.addEventListener("click", () => {
             setting.showInReminders = !(setting.showInReminders !== false);
@@ -6235,7 +6234,7 @@
           if (currentMinutes >= TIMELINE_START_HOUR * 60 && currentMinutes <= TIMELINE_END_HOUR * 60) {
             const current = document.createElement("div");
             current.className = "timeline-current-time";
-            current.style.top = `${56 + (currentMinutes - TIMELINE_START_HOUR * 60) * TIMELINE_PX_PER_MINUTE}px`;
+            current.style.top = `${(currentMinutes - TIMELINE_START_HOUR * 60) * TIMELINE_PX_PER_MINUTE}px`;
             current.setAttribute("aria-label", `現在時刻 ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`);
             track.appendChild(current);
             requestAnimationFrame(() => {
@@ -6259,7 +6258,7 @@
         start = Math.max(minStart, Math.min(maxEnd, start));
         end = Math.max(start + 20, Math.min(maxEnd, end));
         return {
-          top: 56 + (start - minStart) * TIMELINE_PX_PER_MINUTE,
+          top: (start - minStart) * TIMELINE_PX_PER_MINUTE,
           height: Math.max(44, (end - start) * TIMELINE_PX_PER_MINUTE)
         };
       }
