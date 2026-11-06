@@ -3360,6 +3360,114 @@
         font-size: 13px !important;
       }
     }
+
+    /* ライト／ダーク共通：カレンダーと時間軸の境界線・文字のコントラストを確保 */
+    :root[data-theme="dark"] {
+      --timeline-bg: #171c23;
+      --timeline-line: #536071;
+      --timeline-label: #c0cad7;
+      --timeline-event-text: #d5deea;
+      --timeline-empty: #b8c3d1;
+      --calendar-grid-line: #46515f;
+    }
+    :root[data-theme="light"] {
+      --timeline-bg: #fbfcff;
+      --timeline-line: #aebdd0;
+      --timeline-label: #46566c;
+      --timeline-event-text: #34445a;
+      --timeline-empty: #53647a;
+      --calendar-grid-line: #c2cedd;
+    }
+    .weekdays {
+      background: var(--surface-2);
+      border-bottom-color: var(--calendar-grid-line, var(--border));
+    }
+    .day {
+      border-right-color: var(--calendar-grid-line, var(--border));
+      border-bottom-color: var(--calendar-grid-line, var(--border));
+    }
+    .day:hover { background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+    .day.is-other-month {
+      background: var(--surface-2);
+      color: var(--muted);
+    }
+    .day-timeline,
+    .timeline-hour-label,
+    .timeline-all-day-lane { background: var(--timeline-bg); }
+    .timeline-hour { border-top-color: var(--timeline-line); }
+    .timeline-track { border-left-color: var(--timeline-line); }
+    .timeline-all-day-lane { border-bottom-color: var(--timeline-line); }
+    .timeline-hour-label { color: var(--timeline-label); }
+    .timeline-event-time,
+    .timeline-event-meta { color: var(--timeline-event-text); }
+    .timeline-empty { color: var(--timeline-empty); }
+    .timeline-class {
+      border-color: color-mix(in srgb, currentColor 42%, var(--timeline-line));
+    }
+    :root[data-theme="dark"] .timeline-class {
+      background: #203744;
+      border-color: #4d91aa;
+      color: #8bdcf5;
+    }
+    :root[data-theme="dark"] .timeline-class .timeline-event-title { color: #d0f2fc; }
+    :root[data-theme="dark"] .timeline-class.status-exam {
+      background: #48282d;
+      border-color: #ef858b;
+      color: #ffb0b4;
+    }
+    :root[data-theme="dark"] .timeline-class.status-exam .timeline-event-title { color: #ffd0d2; }
+    :root[data-theme="dark"] .timeline-class.status-makeup {
+      background: #203d31;
+      border-color: #66c992;
+      color: #9ce5b9;
+    }
+    :root[data-theme="dark"] .timeline-class.status-makeup .timeline-event-title { color: #d0f6df; }
+    :root[data-theme="dark"] .timeline-class.status-cancelled,
+    :root[data-theme="dark"] .timeline-class.status-ondemand {
+      opacity: .78;
+      background: #292f38;
+      border-color: #778393;
+      color: #c0c8d3;
+    }
+    :root[data-theme="light"] .timeline-class.status-cancelled,
+    :root[data-theme="light"] .timeline-class.status-ondemand {
+      opacity: .9;
+      background: #edf1f6;
+      border-color: #9aa8b9;
+      color: #596779;
+    }
+    :root[data-theme="light"] .timeline-class.status-cancelled .timeline-event-title,
+    :root[data-theme="light"] .timeline-class.status-ondemand .timeline-event-title { color: #596779; }
+    :root[data-theme="light"] .timeline-class.status-exam .timeline-event-title,
+    :root[data-theme="light"] .timeline-class.status-makeup .timeline-event-title { font-weight: 800; }
+    /* 既存のライトモード個別指定より優先し、時間軸の線を十分な濃さにする */
+    :root[data-theme="light"] .timeline-hour { border-top-color: #aebdd0; }
+    :root[data-theme="light"] .timeline-track { border-left-color: #aebdd0; }
+    :root[data-theme="light"] .timeline-hour-label {
+      background: #fbfcff;
+      color: #46566c;
+    }
+    :root[data-theme="light"] .timeline-event-time,
+    :root[data-theme="light"] .timeline-event-meta { color: #34445a; }
+    :root[data-theme="light"] .timeline-empty { color: #53647a; }
+    .today-class-card,
+    .schedule-item,
+    .setting-card,
+    .reminder-row,
+    .timetable-list-item { border-color: var(--border); }
+    :root[data-theme="dark"] .today-class-card.class-status-cancelled { opacity: .9; }
+    :root[data-theme="light"] .today-class-card.class-status-cancelled { opacity: .9; }
+    .schedule-item:focus-visible,
+    .day:focus-visible,
+    .timeline-event:focus-visible,
+    .timeline-all-day-event:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: -2px;
+    }
+    .deadline-badge.is-today { color: #8f1d16; background: #ffe2df; }
+    .deadline-badge.is-soon { color: #795000; background: #ffedb3; }
+    :root[data-theme="dark"] .deadline-badge.is-today { color: #ffc1bd; background: #542b2b; }
+    :root[data-theme="dark"] .deadline-badge.is-soon { color: #ffdc91; background: #4c3b1e; }
 </style>
 </head>
 
